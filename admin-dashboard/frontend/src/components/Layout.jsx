@@ -260,6 +260,9 @@ export function Layout() {
       <div className="lg:pl-64">
         {/* Top bar */}
         <header className="app-topbar sticky top-0 z-30">
+          <div className="app-demo-notice" role="status">
+            This is a demo-purpose page, not to be used for business purposes.
+          </div>
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             <button
               className="lg:hidden p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"

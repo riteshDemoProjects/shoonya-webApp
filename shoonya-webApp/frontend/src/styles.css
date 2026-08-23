@@ -277,6 +277,16 @@ h4 {
   font-size: 0.82rem;
   letter-spacing: 0.02em;
 }
+.announce__notice {
+  padding: 0.45rem 1rem;
+  color: #713f12;
+  background: #f8d77a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.4;
+  text-align: center;
+}
 .announce__track {
   display: flex;
   gap: 3rem;
