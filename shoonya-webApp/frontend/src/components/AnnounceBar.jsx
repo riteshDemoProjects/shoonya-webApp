@@ -10,7 +10,7 @@ export default function AnnounceBar() {
   return (
     <div className="announce">
       <div className="announce__notice" role="status">
-        This is a demo-purpose page, not to be used for business purposes.
+        This page is for demonstration purposes only and is not intended for business use.
       </div>
       <div className="announce__track">
         {loop.map((m, i) => (
