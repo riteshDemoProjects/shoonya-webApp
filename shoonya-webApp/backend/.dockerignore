@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.py[cod]
+# The local SQLite database must never enter the image: production reads Supabase,
+# and baking in a stale copy of real customer data is both a leak and a trap.
+shoonya.db
+*.db
+*.sqlite3

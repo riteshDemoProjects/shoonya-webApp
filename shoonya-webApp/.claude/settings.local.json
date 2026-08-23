@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:shoonyafarms.com)",
+      "WebSearch",
+      "Bash(curl -s -L -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0 Safari/537.36\" \"https://shoonyafarms.com/collections/\" -o home.html --max-time 30)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(curl -s -L -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 Chrome/120.0 Safari/537.36\" \"https://shoonyafarms.com/products.json?limit=250\" -o products.json --max-time 40)",
+      "Bash(echo \"EXIT $?\")",
+      "Bash(npm -v)",
+      "Bash(py --version)",
+      "Bash(pip --version)",
+      "Bash(python -m pip --version)"
+    ]
+  }
+}

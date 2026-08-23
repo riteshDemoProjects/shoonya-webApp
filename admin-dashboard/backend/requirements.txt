@@ -1,0 +1,23 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sqlalchemy==2.0.36
+# PostgreSQL driver used by Supabase DATABASE_URL values. Must match the main
+# site's backend: both services talk to the same database.
+psycopg[binary]>=3.2,<4
+# Ranged rather than pinned: pydantic-core ships compiled wheels per Python
+# version, and an exact old pin has none for newer interpreters (this venv is
+# 3.14), so pip would fall back to a Rust source build and fail.
+pydantic>=2.10,<3
+# Required by the EmailStr field on the admin login schema. Pydantic imports
+# email-validator lazily, so without this the app builds fine and then dies at
+# import time — it was only ever satisfied incidentally by the local venv.
+email-validator>=2.0,<3
+
+# --- auth ---
+passlib[bcrypt]==1.7.4
+# passlib 1.7.4 reads bcrypt.__about__, which bcrypt removed in 4.1.
+# Pinning 4.0.1 avoids the noisy "error reading bcrypt version" trap.
+# 4.0.1 publishes abi3 wheels, so it installs on 3.13/3.14 despite predating them.
+bcrypt==4.0.1
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.9

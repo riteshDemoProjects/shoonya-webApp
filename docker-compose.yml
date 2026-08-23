@@ -1,0 +1,81 @@
+# Single-VM deployment for the Shoonya Farms storefront + admin dashboard.
+#
+# Layout: each frontend image bundles its own Caddy, which serves the built SPA
+# and reverse-proxies that app's API over the internal compose network. The two
+# API containers are never published to the host, so they are unreachable from
+# the internet except through their proxy.
+#
+# The admin SPA gets its own published port instead of a path on port 80: the
+# admin API owns the /admin/* prefix, so mounting the SPA at /admin would collide
+# with it. Separate ports also let you firewall the admin panel to your own IP.
+#
+#   http://<vm-ip>/        -> storefront   (/api/*   -> web-api)
+#   http://<vm-ip>:8080/   -> admin panel  (/admin/* -> admin-api)
+
+name: shoonya
+
+services:
+  web-api:
+    build:
+      context: ./shoonya-webApp/backend
+    environment:
+      # Both services share one Supabase database.
+      DATABASE_URL: ${SUPABASE_DATABASE_URL:?set SUPABASE_DATABASE_URL in .env}
+      SECRET_KEY: ${WEB_SECRET_KEY:?set WEB_SECRET_KEY in .env}
+    # expose, not ports: reachable from the compose network only.
+    expose:
+      - "8001"
+    healthcheck:
+      # The slim image has no curl; urllib is already there.
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8001/api/health',timeout=5).status==200 else 1)"
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./shoonya-webApp/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      web-api:
+        condition: service_started
+    restart: unless-stopped
+
+  admin-api:
+    build:
+      context: ./admin-dashboard/backend
+    environment:
+      DATABASE_URL: ${SUPABASE_DATABASE_URL:?set SUPABASE_DATABASE_URL in .env}
+      # A separate key from the storefront: the two are independent auth domains,
+      # so a leaked customer token must never be usable against the admin API.
+      SECRET_KEY: ${ADMIN_SECRET_KEY:?set ADMIN_SECRET_KEY in .env}
+      # web-api owns the shared schema; see admin-dashboard/backend/app/main.py.
+      RUN_SCHEMA_INIT: "0"
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health',timeout=5).status==200 else 1)"
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: ./admin-dashboard/frontend
+    ports:
+      # Change to "127.0.0.1:8080:80" to make the panel reachable only over an
+      # SSH tunnel — the safest option while there is no HTTPS.
+      - "8080:80"
+    depends_on:
+      admin-api:
+        condition: service_started
+    restart: unless-stopped

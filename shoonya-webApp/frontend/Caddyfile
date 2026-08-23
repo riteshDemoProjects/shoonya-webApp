@@ -1,0 +1,23 @@
+# Serves the storefront SPA and forwards API calls to the backend container, so
+# the browser only ever talks to one origin.
+:80 {
+	encode gzip zstd
+
+	# Must come before the file_server block: /api/* is never a static asset.
+	handle /api/* {
+		reverse_proxy web-api:8001
+	}
+
+	handle {
+		root * /srv
+		# Hashed Vite assets are immutable; index.html must never be cached or
+		# clients keep loading the previous build's asset URLs after a deploy.
+		@immutable path /assets/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+		header /index.html Cache-Control "no-cache"
+
+		# SPA fallback: client-side routes have no file on disk.
+		try_files {path} /index.html
+		file_server
+	}
+}
