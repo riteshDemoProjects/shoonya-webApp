@@ -324,8 +324,20 @@ h4 {
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    /* AnnounceBar.jsx measures the track's half-width and sets --marquee-shift
+       in px. The 50% fallback covers the first frame before that lands. */
+    transform: translateX(calc(-1 * var(--marquee-shift, 50%)));
   }
+}
+/* Reduced-motion presentation: one message at a time, swapped on a timer by
+   AnnounceBar.jsx. Matches the marquee's vertical rhythm so the bar keeps its
+   height either way. */
+.announce__rotator {
+  padding: 0.55rem 1rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 /* Pause-on-hover is a mouse affordance, and it has to be fenced off as one.
    A touch screen leaves :hover applied to whatever was last touched, so a
@@ -346,12 +358,28 @@ h4 {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 253, 248, 0.82);
-  backdrop-filter: blur(12px);
   border-bottom: 1px solid transparent;
   transition:
     box-shadow 0.25s var(--ease),
     border-color 0.25s;
+}
+/* The translucent blur lives on a pseudo-element, not on .header itself, and it
+   has to stay there. An element carrying `backdrop-filter` becomes the
+   containing block for its `position: fixed` descendants, and WebKit also clips
+   descendants that overflow its box. .header contains the mobile nav panel,
+   which hangs entirely *below* the header — so with the filter on .header, iOS
+   Safari clipped the panel away and mispositioned any fixed offset. A
+   pseudo-element has no descendants, so it can carry the filter harmlessly.
+   Blink/Gecko tolerated the old arrangement, which is why this only ever
+   reproduced on a real iPhone and never in DevTools device mode. */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 253, 248, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .header.is-scrolled {
   box-shadow: var(--shadow-sm);
@@ -402,6 +430,10 @@ h4 {
   align-items: center;
   gap: 0.35rem;
   margin-left: 0.5rem;
+}
+/* Only exists for the mobile drawer; the 720px query turns it on. */
+.nav__scrim {
+  display: none;
 }
 .nav__link {
   padding: 0.5rem 0.8rem;
@@ -2624,22 +2656,21 @@ h4 {
     display: grid;
   }
   .nav {
-    /* Absolute against .header — which is `position: sticky`, so it is already a
-       positioned ancestor in every browser — with top:100%. The panel then meets
-       the header's real bottom edge, border included, whatever height the
-       announce bar above it happens to be.
-       Do not reach for `fixed` here again. A fixed panel resolves its offsets
-       against .header only because .header's backdrop-filter promotes it to a
-       containing block for fixed descendants. On phones whose browser drops
-       backdrop-filter that promotion never happens, the offset resolves against
-       the viewport instead, and at scroll-top — where the announce bar is still
-       pushing the header down — the panel lands ~68px from the top and covers
-       the header it is supposed to hang from. Desktop and DevTools device mode
-       both support backdrop-filter, which is why that bug only shows on a real
-       device. Body scroll is locked while the menu is open, so there is nothing
-       for an absolute panel to drift against. */
-    position: absolute;
-    inset: 100% 0 auto 0;
+    /* Fixed against the viewport, at a top offset Header.jsx measures from the
+       header's real bottom edge. This is only safe because .header no longer
+       carries backdrop-filter (see .header::before) — nothing in the ancestor
+       chain establishes a containing block, so the offset resolves against the
+       viewport on every engine including iOS Safari.
+       Fixed rather than absolute deliberately: `overflow:hidden` on <body> does
+       not reliably stop scrolling in iOS Safari, so an absolutely-positioned
+       panel anchored to the sticky header drifts out from under the user's
+       finger when the lock leaks. A viewport-anchored panel cannot drift, and
+       .nav__scrim below absorbs the touches that would have scrolled. */
+    position: fixed;
+    top: var(--nav-top, var(--header-h));
+    right: 0;
+    left: 0;
+    bottom: auto;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
@@ -2663,9 +2694,34 @@ h4 {
     max-height: var(--nav-max-h, calc(100dvh - var(--header-h) - 6rem));
     overflow-y: auto;
     overscroll-behavior: contain;
-    /* .header already carries z-index:50, which lifts this whole group above
-       the page. This only orders the panel against .header__inner. */
-    z-index: 1;
+    /* Let a vertical drag scroll the panel, but never hand the gesture to the
+       page behind it. */
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    /* Above .nav__scrim, and above the header bar's own blur layer. */
+    z-index: 52;
+  }
+  /* iOS Safari ignores `overflow:hidden` on <body>, so the page keeps scrolling
+     under an open menu no matter what scrollLock sets. A full-viewport scrim
+     with touch-action:none swallows those gestures at the source, and doubles as
+     the tap-to-dismiss target the panel was missing. Sits below the header (50)
+     so the close button, logo and cart stay reachable while it is up. */
+  .nav__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(22, 42, 11, 0.28);
+    opacity: 0;
+    visibility: hidden;
+    touch-action: none;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
+  }
+  .nav__scrim.is-open {
+    opacity: 1;
+    visibility: visible;
   }
   .nav.is-open {
     transform: translateY(0);
@@ -2801,8 +2857,13 @@ h4 {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  /* Belt-and-braces: the track is not even rendered under reduced motion
+     (AnnounceBar.jsx swaps in .announce__rotator instead), but if the
+     preference flips mid-session before React re-renders, make sure no
+     half-scrolled frame is left on screen. */
   .announce__track {
     animation: none;
+    transform: none;
   }
 }
 

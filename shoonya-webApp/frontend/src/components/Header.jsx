@@ -125,35 +125,37 @@ export default function Header() {
     setAcctOpen(false)
   }, [location.pathname, location.search, location.hash])
 
-  // The menu panel is anchored to the header, so letting the page scroll behind
-  // it drags the panel up and away from under the user's finger. Lock the body
-  // while it's open, the same way CartDrawer does. Closing the menu — including
-  // the route change above — runs the cleanup and releases the lock.
-  //
-  // The panel is absolute against the header, so CSS alone can't know how far
-  // down the viewport the header's bottom edge currently is — that depends on
-  // how much of the announce bar is still on screen. Measure it and hand the
-  // remaining height to the stylesheet, so a long menu always ends above the
-  // fold instead of running its last item off the bottom.
+  // The menu panel is fixed to the viewport, so it needs to know where the
+  // header's bottom edge currently sits — that moves with how much of the
+  // announce bar is still on screen. Measure it, hand both the offset and the
+  // remaining height to the stylesheet, and keep them in sync: iOS Safari does
+  // not honour `overflow:hidden` on <body>, so the page can still scroll under
+  // an open menu and the header can still move. Tracking scroll means the panel
+  // stays welded to the header even when the lock leaks.
   useEffect(() => {
     if (!menuOpen) return undefined
     const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
-    const syncHeight = () => {
+    const sync = () => {
       const el = headerRef.current
       if (!el) return
       const bottom = el.getBoundingClientRect().bottom
-      el.style.setProperty('--nav-max-h', `${Math.max(0, window.innerHeight - bottom)}px`)
+      el.style.setProperty('--nav-top', `${Math.round(bottom)}px`)
+      el.style.setProperty('--nav-max-h', `${Math.max(0, Math.round(window.innerHeight - bottom))}px`)
     }
-    syncHeight()
+    sync()
     document.addEventListener('keydown', onKey)
-    window.addEventListener('resize', syncHeight)
-    window.addEventListener('orientationchange', syncHeight)
+    window.addEventListener('resize', sync)
+    window.addEventListener('orientationchange', sync)
+    window.addEventListener('scroll', sync, { passive: true })
     lockScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
-      window.removeEventListener('resize', syncHeight)
-      window.removeEventListener('orientationchange', syncHeight)
-      headerRef.current?.style.removeProperty('--nav-max-h')
+      window.removeEventListener('resize', sync)
+      window.removeEventListener('orientationchange', sync)
+      window.removeEventListener('scroll', sync)
+      const el = headerRef.current
+      el?.style.removeProperty('--nav-top')
+      el?.style.removeProperty('--nav-max-h')
       unlockScroll()
     }
   }, [menuOpen])
@@ -165,54 +167,65 @@ export default function Header() {
   }
 
   return (
-    <header ref={headerRef} className={`header ${scrolled ? 'is-scrolled' : ''}`}>
-      <div className="header__inner">
-        <button
-          className="header__burger"
-          aria-label="Menu"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          {menuOpen ? <CloseIcon /> : <MenuIcon />}
-        </button>
-
-        <Link to="/" className="brand" aria-label="Shoonya Farms home">
-          {/* The badge contains the wordmark, so it needs no text beside it.
-              width/height are the rendered size, reserving the box before CSS
-              lands; styles.css owns the real dimensions. */}
-          <img src="/logo.svg" alt="Shoonya Farms" className="brand__mark" width="44" height="46" />
-        </Link>
-
-        <div className="header__actions">
-          <form className="search" onSubmit={submitSearch} role="search">
-            <SearchIcon className="search__icon" />
-            <input
-              type="search"
-              placeholder="Search staples…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              aria-label="Search products"
-            />
-          </form>
-          <AccountMenu open={acctOpen} setOpen={setAcctOpen} />
-          <button className="cart-btn" onClick={openCart} aria-label={`Cart, ${count} items`}>
-            <CartIcon />
-            {count > 0 && <span className="cart-btn__count">{count}</span>}
-          </button>
-        </div>
-      </div>
-      <nav className={`nav ${menuOpen ? 'is-open' : ''}`}>
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`}
+    <>
+      <header ref={headerRef} className={`header ${scrolled ? 'is-scrolled' : ''}`}>
+        <div className="header__inner">
+          <button
+            className="header__burger"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
           >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-    </header>
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+
+          <Link to="/" className="brand" aria-label="Shoonya Farms home">
+            {/* The badge contains the wordmark, so it needs no text beside it.
+                width/height are the rendered size, reserving the box before CSS
+                lands; styles.css owns the real dimensions. */}
+            <img src="/logo.svg" alt="Shoonya Farms" className="brand__mark" width="44" height="46" />
+          </Link>
+
+          <div className="header__actions">
+            <form className="search" onSubmit={submitSearch} role="search">
+              <SearchIcon className="search__icon" />
+              <input
+                type="search"
+                placeholder="Search staples…"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                aria-label="Search products"
+              />
+            </form>
+            <AccountMenu open={acctOpen} setOpen={setAcctOpen} />
+            <button className="cart-btn" onClick={openCart} aria-label={`Cart, ${count} items`}>
+              <CartIcon />
+              {count > 0 && <span className="cart-btn__count">{count}</span>}
+            </button>
+          </div>
+        </div>
+        <nav className={`nav ${menuOpen ? 'is-open' : ''}`}>
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+      </header>
+      {/* Sibling of <header>, not a child. Inside it, the scrim would join the
+          header's z-index:50 stacking context, where no z-index can put it
+          beneath .header__inner — it covered the close button and the cart. Out
+          here, header (50) simply beats scrim (40). */}
+      <div
+        className={`nav__scrim ${menuOpen ? 'is-open' : ''}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
+    </>
   )
 }
