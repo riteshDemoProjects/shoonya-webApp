@@ -4,18 +4,39 @@
    ============================================================ */
 
 :root {
-  display: none;
-  position: static;
-  height: auto;
+  /* Brand palette */
+  --forest: #1f3a10;
+  --forest-deep: #162a0b;
+  --olive: #395415;
+  --leaf: #4e7a1f;
+  --amber: #e0a52e;
+  --amber-deep: #c4881a;
+  --cream: #faf7ef;
   --cream-2: #f3eddd;
   --paper: #fffdf8;
   --ink: #23301a;
-  padding: 0.75rem 1rem 1rem;
+  --muted: #6a7360;
   --line: #e7e1d0;
   --line-soft: #efeade;
-  border-top: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line);
+
   --danger: #b64528;
+  --star: #e0a52e;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  --shadow-sm:
+    0 1px 2px rgba(31, 58, 16, 0.06), 0 2px 6px rgba(31, 58, 16, 0.05);
+  --shadow: 0 8px 24px rgba(31, 58, 16, 0.08);
+  --shadow-lg: 0 20px 50px rgba(31, 58, 16, 0.16);
+
+  --maxw: 1200px;
+  --header-h: 68px;
+
+  --sans: "Poppins", system-ui, -apple-system, sans-serif;
+  --serif: "Fraunces", "Georgia", serif;
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -2678,6 +2699,17 @@ h4 {
   }
   .nav--mobile.is-open {
     display: flex;
+  }
+  .nav--ios {
+    position: fixed;
+    top: var(--ios-nav-top, var(--header-h));
+    right: 0;
+    left: auto;
+    width: 50vw;
+    min-width: 220px;
+    max-width: 320px;
+    max-height: calc(100dvh - var(--ios-nav-top, var(--header-h)));
+    z-index: 60;
   }
   .nav__link {
     padding: 0.8rem 1rem;
