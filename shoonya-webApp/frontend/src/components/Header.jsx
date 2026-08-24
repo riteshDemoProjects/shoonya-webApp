@@ -222,6 +222,7 @@ export default function Header() {
               key={item.to}
               to={item.to}
               end={item.end}
+              onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 `nav__link ${isActive ? "is-active" : ""}`
               }
@@ -240,6 +241,7 @@ export default function Header() {
               to={item.to}
               end={item.end}
               tabIndex={menuOpen ? 0 : -1}
+              onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 `nav__link ${isActive ? "is-active" : ""}`
               }
