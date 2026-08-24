@@ -126,6 +126,14 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const [q, setQ] = useState("");
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    setIsIOS(
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+    );
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -154,13 +162,25 @@ export default function Header() {
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("touchmove", onTouchMove, { passive: false });
+    if (isIOS) {
+      document.documentElement.classList.add("ios-menu-open");
+      document.body.classList.add("ios-menu-open");
+      document.documentElement.style.overscrollBehavior = "none";
+      document.body.style.overscrollBehavior = "none";
+    }
     lockScroll();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("touchmove", onTouchMove);
+      if (isIOS) {
+        document.documentElement.classList.remove("ios-menu-open");
+        document.body.classList.remove("ios-menu-open");
+        document.documentElement.style.removeProperty("overscroll-behavior");
+        document.body.style.removeProperty("overscroll-behavior");
+      }
       unlockScroll();
     };
-  }, [menuOpen]);
+  }, [isIOS, menuOpen]);
 
   const submitSearch = (e) => {
     e.preventDefault();

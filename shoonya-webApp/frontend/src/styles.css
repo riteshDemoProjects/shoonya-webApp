@@ -2778,6 +2778,15 @@ h4 {
   }
 }
 
+/* Safari can continue the document's rubber-band scroll while an overlay is
+   open even when body overflow is locked. This applies only to the iOS class
+   added by Header.jsx; Android keeps the normal mobile scrolling behavior. */
+html.ios-menu-open,
+body.ios-menu-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 @media (max-width: 420px) {
   .values {
     grid-template-columns: 1fr;
