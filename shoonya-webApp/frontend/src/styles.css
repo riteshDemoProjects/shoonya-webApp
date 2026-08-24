@@ -53,6 +53,12 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Deliberately no `scrollbar-gutter: stable` here. It would smooth over the
+     15px sideways nudge when an overlay locks body scroll on a desktop window,
+     but it measurably reflows the desktop page (home went 4203px -> 4193px,
+     hero 733.75 -> 731.66) and that view is the known-good reference. It buys
+     nothing on real phones either, where scrollbars are overlays and locking
+     reclaims no width. The nudge it would hide predates this work. */
 }
 body {
   font-family: var(--sans);
@@ -61,6 +67,13 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Backstop only — every known overflow is fixed at its source. Two reasons it
+     lives here and not on <html>: `clip` rather than `hidden` because `hidden`
+     would make this a scroll container and break the sticky header, and on
+     <body> rather than <html> because overflow only propagates to the viewport
+     from <body> while <html> is still `visible` — setting anything on <html>
+     would cut off that propagation and disable the scroll lock. */
+  overflow-x: clip;
 }
 img,
 svg {
@@ -1573,7 +1586,12 @@ h4 {
 
 .fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, …) rather than a bare 1fr: `1fr` is `minmax(auto, 1fr)`, so each
+     track can never shrink below its content's min-content width. An input's
+     min-content width is its default ~20-character size plus padding (~217px),
+     which on a phone made these two tracks 450px wide inside a 303px panel and
+     put the whole checkout and profile page into horizontal scroll. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1rem;
 }
 .field {
@@ -2591,8 +2609,15 @@ h4 {
     display: grid;
   }
   .nav {
-    position: fixed;
-    inset: calc(var(--header-h)) 0 auto 0;
+    /* Absolute against .header — which is `position: sticky`, so it is already a
+       positioned ancestor — with top:100%. The panel then meets the header's
+       real bottom edge whatever height the announce bar above it happens to be.
+       This was `fixed` with a hardcoded `calc(var(--header-h))` offset, which
+       only landed in the right place because .header's backdrop-filter happens
+       to promote it to a containing block for fixed descendants; where
+       backdrop-filter is unsupported the panel fell behind the announce bar. */
+    position: absolute;
+    inset: 100% 0 auto 0;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
@@ -2608,8 +2633,13 @@ h4 {
       transform 0.3s var(--ease),
       opacity 0.3s,
       visibility 0.3s;
-    max-height: calc(100dvh - var(--header-h));
+    /* The header's bottom edge sits up to one announce bar (~88px) below the
+       viewport top, so that has to come out of the budget too — otherwise a
+       menu long enough to hit the cap would run past the fold with its last
+       item unreachable. */
+    max-height: calc(100dvh - var(--header-h) - 6rem);
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .nav.is-open {
     transform: translateY(0);
@@ -2670,6 +2700,27 @@ h4 {
     grid-column: 1 / -1;
     justify-content: space-between;
   }
+
+  /* Two 143px columns on a phone is not a usable address form — stack them. */
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* iOS Safari zooms the whole page in when a focused field's text is under
+     16px, and never zooms back out. 0.95rem (15.2px) tripped it on every form
+     on the site. Desktop keeps 0.95rem. Tablets are handled by the
+     pointer-coarse rule at the end of this file — they sit above 720px but
+     still zoom. */
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px;
+  }
+  /* 28x30 is well under the ~44px a fingertip needs, and these sit next to the
+     remove button in the cart drawer. */
+  .line__foot .qty button {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 @media (max-width: 420px) {
@@ -2689,9 +2740,11 @@ h4 {
   .price__now {
     font-size: 1.1rem;
   }
+  /* Was 38px — below the ~44px minimum for a primary action, and this is the
+     add-to-cart button on every product card. */
   .add-btn {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
   }
   .hero__cta {
     flex-direction: column;
@@ -2724,5 +2777,19 @@ h4 {
   }
   .announce__track {
     animation: none;
+  }
+}
+
+/* Tablets miss the 720px mobile query but still auto-zoom on focus: an iPad in
+   portrait is 768px wide. Keying off input capability rather than width covers
+   every touch device at any size, and leaves mouse-driven browsers on 0.95rem
+   no matter how narrow the window — so the desktop rendering is untouched.
+   Last in the file so it wins on source order without needing !important. */
+@media (hover: none) and (pointer: coarse) {
+  .field input,
+  .field select,
+  .field textarea,
+  .search input {
+    font-size: 16px;
   }
 }

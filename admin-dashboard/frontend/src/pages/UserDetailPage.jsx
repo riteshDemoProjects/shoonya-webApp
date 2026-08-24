@@ -188,7 +188,7 @@ export function UserDetailPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <Link to={`/orders/${order.id}`} className="text-green-600 hover:text-green-900">
+                          <Link to={`/orders/${order.id}`} className="text-green-600 hover:text-green-900 inline-flex items-center justify-center min-h-11 px-2 lg:inline lg:min-h-0 lg:px-0">
                             View
                           </Link>
                         </td>

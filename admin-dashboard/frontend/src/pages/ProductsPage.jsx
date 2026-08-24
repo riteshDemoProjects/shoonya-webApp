@@ -286,13 +286,13 @@ export function ProductsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <Link
                           to={`/products/${product.id}/edit`}
-                          className="text-green-600 hover:text-green-900 mr-3"
+                          className="text-green-600 hover:text-green-900 mr-3 inline-flex items-center justify-center min-h-11 px-2 lg:inline lg:min-h-0 lg:px-0"
                         >
                           Edit
                         </Link>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 inline-flex items-center justify-center min-h-11 px-2 lg:inline lg:min-h-0 lg:px-0"
                         >
                           Delete
                         </button>

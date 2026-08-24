@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: DashboardIcon },
@@ -148,6 +148,42 @@ export function Layout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Tapping a nav link navigates but left the panel sitting over the new page,
+  // with the scrim still at full opacity and swallowing taps. Close on every
+  // route change so the destination is actually usable.
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Without this the page scrolls behind the open panel: the sidebar is
+  // `fixed`, so wheel/touch over the scrim moves the content underneath it.
+  //
+  // Guarded on the lg breakpoint because above it the sidebar is permanently
+  // docked (`lg:translate-x-0`) rather than overlaid, so a stale `sidebarOpen`
+  // left over from a narrow viewport must not lock a desktop window. The
+  // cleanup restores the previous value, so it also unlocks on unmount.
+  useEffect(() => {
+    if (!sidebarOpen) return undefined;
+    const offCanvas = window.matchMedia("(max-width: 1023.98px)");
+    if (!offCanvas.matches) return undefined;
+    const onKey = (e) => e.key === "Escape" && setSidebarOpen(false);
+    // This effect only re-runs on sidebarOpen, so growing the window past lg
+    // while the panel is open would otherwise strand a docked-sidebar desktop
+    // layout with the scroll still locked. Collapse the panel on the crossing.
+    const onBreakpoint = () => {
+      if (!offCanvas.matches) setSidebarOpen(false);
+    };
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKey);
+    offCanvas.addEventListener("change", onBreakpoint);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      offCanvas.removeEventListener("change", onBreakpoint);
+      document.body.style.overflow = previous;
+    };
+  }, [sidebarOpen]);
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -188,7 +224,7 @@ export function Layout() {
               <span className="text-lg font-bold">Shoonya Farms</span>
             </Link>
             <button
-              className="lg:hidden p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+              className="lg:hidden p-2.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close sidebar"
             >
@@ -265,7 +301,7 @@ export function Layout() {
           </div>
           <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
             <button
-              className="lg:hidden p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+              className="lg:hidden p-2.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open sidebar"
               aria-expanded={sidebarOpen}

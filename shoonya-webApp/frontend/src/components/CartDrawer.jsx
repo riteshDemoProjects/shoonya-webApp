@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '../context/CartContext'
+import { lockScroll, unlockScroll } from '../scrollLock'
 import { formatINR } from '../data/catalogMeta'
 import ProductMedia from './ProductMedia'
 import { CloseIcon, TrashIcon, ArrowRight } from './icons'
@@ -10,14 +11,13 @@ export default function CartDrawer() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    if (!isOpen) return undefined
     const onKey = (e) => e.key === 'Escape' && closeCart()
-    if (isOpen) {
-      document.addEventListener('keydown', onKey)
-      document.body.style.overflow = 'hidden'
-    }
+    document.addEventListener('keydown', onKey)
+    lockScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
+      unlockScroll()
     }
   }, [isOpen, closeCart])
 

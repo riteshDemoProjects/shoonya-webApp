@@ -8,6 +8,16 @@
   html {
     @apply antialiased;
   }
+  /* Below lg the sidebar is an overlay and opening it sets
+     `body { overflow: hidden }`, which reclaims the scrollbar's width and
+     shifts the page sideways in a narrow desktop window. Reserving the gutter
+     holds the layout still. Scoped to the same breakpoint as the lock so the
+     docked-sidebar desktop view keeps its exact current content width. */
+  @media (max-width: 1023.98px) {
+    html {
+      scrollbar-gutter: stable;
+    }
+  }
   body {
     @apply text-gray-900;
     background: #f4f5ef;

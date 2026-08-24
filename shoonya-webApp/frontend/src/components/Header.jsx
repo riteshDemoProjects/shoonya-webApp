@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { lockScroll, unlockScroll } from '../scrollLock'
 import {
   CartIcon,
   SearchIcon,
@@ -122,6 +123,21 @@ export default function Header() {
     setMenuOpen(false)
     setAcctOpen(false)
   }, [location.pathname, location.search, location.hash])
+
+  // The menu panel is anchored to the header, so letting the page scroll behind
+  // it drags the panel up and away from under the user's finger. Lock the body
+  // while it's open, the same way CartDrawer does. Closing the menu — including
+  // the route change above — runs the cleanup and releases the lock.
+  useEffect(() => {
+    if (!menuOpen) return undefined
+    const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
+    document.addEventListener('keydown', onKey)
+    lockScroll()
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      unlockScroll()
+    }
+  }, [menuOpen])
 
   const submitSearch = (e) => {
     e.preventDefault()
