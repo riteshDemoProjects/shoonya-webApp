@@ -150,6 +150,9 @@ export default function Header() {
   useEffect(() => {
     if (!menuOpen) return undefined;
     const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
+    const onTouchMove = (e) => {
+      if (!e.target.closest(".nav--mobile")) e.preventDefault();
+    };
     const sync = () => {
       const el = headerRef.current;
       if (!el) return;
@@ -167,13 +170,13 @@ export default function Header() {
     document.addEventListener("keydown", onKey);
     window.addEventListener("resize", sync);
     window.addEventListener("orientationchange", sync);
-    window.addEventListener("scroll", sync, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
     lockScroll();
     return () => {
       document.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", sync);
       window.removeEventListener("orientationchange", sync);
-      window.removeEventListener("scroll", sync);
+      document.removeEventListener("touchmove", onTouchMove);
       document.documentElement.style.removeProperty("--nav-top");
       document.documentElement.style.removeProperty("--nav-max-h");
       unlockScroll();

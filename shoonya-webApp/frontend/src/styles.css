@@ -2683,6 +2683,7 @@ h4 {
       transform 0.3s var(--ease),
       opacity 0.3s,
       visibility 0.3s;
+    pointer-events: none;
     /* The header's bottom edge sits up to one announce bar below the viewport
        top, so that has to come out of the budget too — otherwise a menu long
        enough to hit the cap runs past the fold with its last item unreachable.
@@ -2724,6 +2725,7 @@ h4 {
     transform: translateY(0);
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
   }
   .nav__link {
     padding: 0.8rem 1rem;
