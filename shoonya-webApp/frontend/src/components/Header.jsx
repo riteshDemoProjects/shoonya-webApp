@@ -154,7 +154,10 @@ export default function Header() {
       const el = headerRef.current;
       if (!el) return;
       const bottom = el.getBoundingClientRect().bottom;
-      document.documentElement.style.setProperty("--nav-top", `${Math.round(bottom)}px`);
+      document.documentElement.style.setProperty(
+        "--nav-top",
+        `${Math.round(bottom)}px`,
+      );
       document.documentElement.style.setProperty(
         "--nav-max-h",
         `${Math.max(0, Math.round(window.innerHeight - bottom))}px`,
