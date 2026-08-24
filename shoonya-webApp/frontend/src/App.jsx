@@ -21,14 +21,33 @@ import AccountProfile from './pages/AccountProfile'
 function ScrollManager() {
   const { pathname, hash } = useLocation()
   useEffect(() => {
-    if (hash) {
-      const el = document.querySelector(hash)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' })
-        return
+    let frame
+    let timer
+    let attempts = 0
+    const scrollToTarget = () => {
+      if (hash) {
+        const target = document.getElementById(hash.slice(1))
+        if (target) {
+          const header = document.querySelector('.header')
+          const offset = header?.getBoundingClientRect().height || 0
+          const targetTop = target.getBoundingClientRect().top + window.scrollY
+          window.scrollTo({ top: Math.max(0, targetTop - offset), behavior: 'auto' })
+          return
+        }
+        if (attempts++ < 60) {
+          frame = requestAnimationFrame(scrollToTarget)
+          return
+        }
       }
+      window.scrollTo({ top: 0, behavior: 'auto' })
     }
-    window.scrollTo({ top: 0 })
+    timer = window.setTimeout(() => {
+      frame = requestAnimationFrame(scrollToTarget)
+    }, 100)
+    return () => {
+      window.clearTimeout(timer)
+      cancelAnimationFrame(frame)
+    }
   }, [pathname, hash])
   return null
 }

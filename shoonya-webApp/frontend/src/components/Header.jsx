@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -127,15 +126,6 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const [q, setQ] = useState("");
-  const [isIOS, setIsIOS] = useState(false);
-  const headerRef = useRef(null);
-
-  useEffect(() => {
-    setIsIOS(
-      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
-    );
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -162,25 +152,12 @@ export default function Header() {
     const onTouchMove = (e) => {
       if (!e.target.closest(".nav--mobile")) e.preventDefault();
     };
-    const syncIOSPosition = () => {
-      if (!isIOS || !headerRef.current) return;
-      document.documentElement.style.setProperty(
-        "--ios-nav-top",
-        `${Math.round(headerRef.current.getBoundingClientRect().bottom)}px`,
-      );
-    };
-    syncIOSPosition();
     document.addEventListener("keydown", onKey);
     document.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("resize", syncIOSPosition);
-    window.addEventListener("orientationchange", syncIOSPosition);
     lockScroll();
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("resize", syncIOSPosition);
-      window.removeEventListener("orientationchange", syncIOSPosition);
-      document.documentElement.style.removeProperty("--ios-nav-top");
       unlockScroll();
     };
   }, [menuOpen]);
@@ -193,10 +170,7 @@ export default function Header() {
 
   return (
     <>
-      <header
-        ref={headerRef}
-        className={`header ${scrolled ? "is-scrolled" : ""}`}
-      >
+      <header className={`header ${scrolled ? "is-scrolled" : ""}`}>
         <div className="header__inner">
           <button
             className="header__burger"
@@ -256,49 +230,25 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
-        {!isIOS && (
-          <nav
-            className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
-            aria-hidden={!menuOpen}
-          >
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                tabIndex={menuOpen ? 0 : -1}
-                className={({ isActive }) =>
-                  `nav__link ${isActive ? "is-active" : ""}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-        )}
+        <nav
+          className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
+          aria-hidden={!menuOpen}
+        >
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              tabIndex={menuOpen ? 0 : -1}
+              className={({ isActive }) =>
+                `nav__link ${isActive ? "is-active" : ""}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
-      {isIOS &&
-        createPortal(
-          <nav
-            className={`nav nav--mobile nav--ios ${menuOpen ? "is-open" : ""}`}
-            aria-hidden={!menuOpen}
-          >
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                tabIndex={menuOpen ? 0 : -1}
-                className={({ isActive }) =>
-                  `nav__link ${isActive ? "is-active" : ""}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>,
-          document.body,
-        )}
       {/* Sibling of <header>, not a child. Inside it, the scrim would join the
           header's z-index:50 stacking context, where no z-index can put it
           beneath .header__inner — it covered the close button and the cart. Out

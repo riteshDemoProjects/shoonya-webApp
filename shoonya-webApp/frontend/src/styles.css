@@ -2655,8 +2655,9 @@ h4 {
     display: none;
     position: absolute;
     top: 100%;
-    right: 0;
+    right: auto;
     left: 0;
+    width: 50vw;
     height: auto;
     flex-direction: column;
     align-items: stretch;
@@ -2699,17 +2700,6 @@ h4 {
   }
   .nav--mobile.is-open {
     display: flex;
-  }
-  .nav--ios {
-    position: fixed;
-    top: var(--ios-nav-top, var(--header-h));
-    left: 0;
-    right: auto;
-    width: 50vw;
-    min-width: 220px;
-    max-width: 320px;
-    max-height: calc(100dvh - var(--ios-nav-top, var(--header-h)));
-    z-index: 60;
   }
   .nav__link {
     padding: 0.8rem 1rem;
