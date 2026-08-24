@@ -156,6 +156,16 @@ export default function Header() {
   // stays welded to the header even when the lock leaks.
   useEffect(() => {
     if (!menuOpen) return undefined;
+    const iosScrollY = isIOS ? window.scrollY : 0;
+    const originalBodyStyle = isIOS
+      ? {
+          position: document.body.style.position,
+          top: document.body.style.top,
+          left: document.body.style.left,
+          right: document.body.style.right,
+          width: document.body.style.width,
+        }
+      : null;
     const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
     const onTouchMove = (e) => {
       if (!e.target.closest(".nav--mobile")) e.preventDefault();
@@ -165,6 +175,11 @@ export default function Header() {
     if (isIOS) {
       document.documentElement.classList.add("ios-menu-open");
       document.body.classList.add("ios-menu-open");
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${iosScrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
       document.documentElement.style.overscrollBehavior = "none";
       document.body.style.overscrollBehavior = "none";
     }
@@ -175,8 +190,14 @@ export default function Header() {
       if (isIOS) {
         document.documentElement.classList.remove("ios-menu-open");
         document.body.classList.remove("ios-menu-open");
+        document.body.style.position = originalBodyStyle.position;
+        document.body.style.top = originalBodyStyle.top;
+        document.body.style.left = originalBodyStyle.left;
+        document.body.style.right = originalBodyStyle.right;
+        document.body.style.width = originalBodyStyle.width;
         document.documentElement.style.removeProperty("overscroll-behavior");
         document.body.style.removeProperty("overscroll-behavior");
+        window.scrollTo(0, iosScrollY);
       }
       unlockScroll();
     };
@@ -186,6 +207,13 @@ export default function Header() {
     e.preventDefault();
     const term = q.trim();
     navigate(term ? `/shop?search=${encodeURIComponent(term)}` : "/shop");
+  };
+
+  const handleMobileTouchEnd = (item, e) => {
+    if (!isIOS) return;
+    e.preventDefault();
+    setMenuOpen(false);
+    navigate(item.to);
   };
 
   return (
@@ -262,6 +290,7 @@ export default function Header() {
               end={item.end}
               tabIndex={menuOpen ? 0 : -1}
               onClick={() => setMenuOpen(false)}
+              onTouchEnd={(e) => handleMobileTouchEnd(item, e)}
               className={({ isActive }) =>
                 `nav__link ${isActive ? "is-active" : ""}`
               }

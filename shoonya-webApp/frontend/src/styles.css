@@ -2786,6 +2786,12 @@ body.ios-menu-open {
   overflow: hidden;
   overscroll-behavior: none;
 }
+body.ios-menu-open .header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+}
 
 @media (max-width: 420px) {
   .values {
