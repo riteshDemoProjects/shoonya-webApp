@@ -2703,8 +2703,8 @@ h4 {
   .nav--ios {
     position: fixed;
     top: var(--ios-nav-top, var(--header-h));
-    right: 0;
-    left: auto;
+    left: 0;
+    right: auto;
     width: 50vw;
     min-width: 220px;
     max-width: 320px;
