@@ -2653,17 +2653,17 @@ h4 {
   }
   .nav--mobile {
     display: flex;
-     /* A full-screen layer avoids iOS Safari delaying a fixed sibling panel
+    /* A full-screen layer avoids iOS Safari delaying a fixed sibling panel
        until the next gesture. The header remains above it; links start below
        the measured header edge. */
     position: fixed;
-     inset: 0;
-     height: 100dvh;
-     z-index: 45;
+    inset: 0;
+    height: 100dvh;
+    z-index: 45;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
-     padding: calc(var(--nav-top, var(--header-h)) + 1rem) 1rem 1rem;
+    padding: calc(var(--nav-top, var(--header-h)) + 1rem) 1rem 1rem;
     gap: 0.2rem;
     margin: 0;
     border-bottom: 1px solid var(--line);
@@ -2676,7 +2676,7 @@ h4 {
       opacity 0.3s,
       visibility 0.3s;
     pointer-events: none;
-     max-height: none;
+    max-height: none;
     overflow-y: auto;
     overscroll-behavior: contain;
     /* Let a vertical drag scroll the panel, but never hand the gesture to the
