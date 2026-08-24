@@ -421,6 +421,9 @@ h4 {
   gap: 0.35rem;
   margin-left: 0.5rem;
 }
+.nav--mobile {
+  display: none;
+}
 /* Only exists for the mobile drawer; the 720px query turns it on. */
 .nav__scrim {
   display: none;
@@ -2645,7 +2648,11 @@ h4 {
   .header__burger {
     display: grid;
   }
-  .nav {
+  .nav--desktop {
+    display: none;
+  }
+  .nav--mobile {
+    display: flex;
     /* Fixed against the viewport, at a top offset Header.jsx measures from the
        header's real bottom edge. This is only safe because .header no longer
        carries backdrop-filter (see .header::before) — nothing in the ancestor
@@ -2656,8 +2663,8 @@ h4 {
        panel anchored to the sticky header drifts out from under the user's
        finger when the lock leaks. A viewport-anchored panel cannot drift, and
        .nav__scrim below absorbs the touches that would have scrolled. */
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: var(--nav-top, var(--header-h));
     right: 0;
     left: 0;
     bottom: auto;
@@ -2846,6 +2853,10 @@ h4 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .announce__track {
+    animation-duration: 28s !important;
+    animation-iteration-count: infinite !important;
   }
 }
 

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
-import { lockScroll, unlockScroll } from '../scrollLock'
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { lockScroll, unlockScroll } from "../scrollLock";
 import {
   CartIcon,
   SearchIcon,
@@ -11,48 +11,49 @@ import {
   UserIcon,
   PackageIcon,
   LogoutIcon,
-} from './icons'
+} from "./icons";
 
 const NAV = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/shop', label: 'Shop' },
-  { to: '/shop?category=ghee', label: 'Ghee' },
-  { to: '/shop?category=honey', label: 'Honey' },
-  { to: '/shop?category=cold-pressed-oils', label: 'Oils' },
-  { to: '/#story', label: 'Our Story' },
-]
+  { to: "/", label: "Home", end: true },
+  { to: "/shop", label: "Shop" },
+  { to: "/shop?category=ghee", label: "Ghee" },
+  { to: "/shop?category=honey", label: "Honey" },
+  { to: "/shop?category=cold-pressed-oils", label: "Oils" },
+  { to: "/#story", label: "Our Story" },
+];
 
-const initials = (name = '') =>
+const initials = (name = "") =>
   name
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() || '')
-    .join('') || '🌿'
+    .map((w) => w[0]?.toUpperCase() || "")
+    .join("") || "🌿";
 
 function AccountMenu({ open, setOpen }) {
-  const { user, isLoggedIn, loading, logout } = useAuth()
-  const navigate = useNavigate()
-  const wrapRef = useRef(null)
+  const { user, isLoggedIn, loading, logout } = useAuth();
+  const navigate = useNavigate();
+  const wrapRef = useRef(null);
 
   // Close on outside click / Escape — a dropdown you can't dismiss is a trap.
   useEffect(() => {
-    if (!open) return undefined
+    if (!open) return undefined;
     const onDown = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
-    }
-    const onKey = (e) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
+      if (wrapRef.current && !wrapRef.current.contains(e.target))
+        setOpen(false);
+    };
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open, setOpen])
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, setOpen]);
 
   if (loading) {
     // Reserve the space so the header doesn't jump once the session resolves.
-    return <div className="acct__placeholder" aria-hidden="true" />
+    return <div className="acct__placeholder" aria-hidden="true" />;
   }
 
   if (!isLoggedIn) {
@@ -61,14 +62,14 @@ function AccountMenu({ open, setOpen }) {
         <UserIcon />
         <span className="acct__login-text">Log in</span>
       </Link>
-    )
+    );
   }
 
   const signOut = () => {
-    setOpen(false)
-    logout()
-    navigate('/', { replace: true })
-  }
+    setOpen(false);
+    logout();
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="acct" ref={wrapRef}>
@@ -88,42 +89,56 @@ function AccountMenu({ open, setOpen }) {
             <strong>{user.full_name}</strong>
             <span className="muted">{user.email}</span>
           </div>
-          <Link to="/account/orders" className="acct__item" role="menuitem" onClick={() => setOpen(false)}>
+          <Link
+            to="/account/orders"
+            className="acct__item"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+          >
             <PackageIcon /> My orders
           </Link>
-          <Link to="/account/profile" className="acct__item" role="menuitem" onClick={() => setOpen(false)}>
+          <Link
+            to="/account/profile"
+            className="acct__item"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+          >
             <UserIcon /> Profile
           </Link>
-          <button className="acct__item acct__item--out" role="menuitem" onClick={signOut}>
+          <button
+            className="acct__item acct__item--out"
+            role="menuitem"
+            onClick={signOut}
+          >
             <LogoutIcon /> Log out
           </button>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default function Header() {
-  const { count, openCart } = useCart()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [acctOpen, setAcctOpen] = useState(false)
-  const [q, setQ] = useState('')
-  const headerRef = useRef(null)
+  const { count, openCart } = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [acctOpen, setAcctOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const headerRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
-    setMenuOpen(false)
-    setAcctOpen(false)
-  }, [location.pathname, location.search, location.hash])
+    setMenuOpen(false);
+    setAcctOpen(false);
+  }, [location.pathname, location.search, location.hash]);
 
   // The menu panel is fixed to the viewport, so it needs to know where the
   // header's bottom edge currently sits — that moves with how much of the
@@ -133,42 +148,48 @@ export default function Header() {
   // an open menu and the header can still move. Tracking scroll means the panel
   // stays welded to the header even when the lock leaks.
   useEffect(() => {
-    if (!menuOpen) return undefined
-    const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
+    if (!menuOpen) return undefined;
+    const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
     const sync = () => {
-      const el = headerRef.current
-      if (!el) return
-      const bottom = el.getBoundingClientRect().bottom
-      el.style.setProperty('--nav-top', `${Math.round(bottom)}px`)
-      el.style.setProperty('--nav-max-h', `${Math.max(0, Math.round(window.innerHeight - bottom))}px`)
-    }
-    sync()
-    document.addEventListener('keydown', onKey)
-    window.addEventListener('resize', sync)
-    window.addEventListener('orientationchange', sync)
-    window.addEventListener('scroll', sync, { passive: true })
-    lockScroll()
+      const el = headerRef.current;
+      if (!el) return;
+      const bottom = el.getBoundingClientRect().bottom;
+      el.style.setProperty("--nav-top", `${Math.round(bottom)}px`);
+      el.style.setProperty(
+        "--nav-max-h",
+        `${Math.max(0, Math.round(window.innerHeight - bottom))}px`,
+      );
+    };
+    sync();
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", sync);
+    window.addEventListener("orientationchange", sync);
+    window.addEventListener("scroll", sync, { passive: true });
+    lockScroll();
     return () => {
-      document.removeEventListener('keydown', onKey)
-      window.removeEventListener('resize', sync)
-      window.removeEventListener('orientationchange', sync)
-      window.removeEventListener('scroll', sync)
-      const el = headerRef.current
-      el?.style.removeProperty('--nav-top')
-      el?.style.removeProperty('--nav-max-h')
-      unlockScroll()
-    }
-  }, [menuOpen])
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("orientationchange", sync);
+      window.removeEventListener("scroll", sync);
+      const el = headerRef.current;
+      el?.style.removeProperty("--nav-top");
+      el?.style.removeProperty("--nav-max-h");
+      unlockScroll();
+    };
+  }, [menuOpen]);
 
   const submitSearch = (e) => {
-    e.preventDefault()
-    const term = q.trim()
-    navigate(term ? `/shop?search=${encodeURIComponent(term)}` : '/shop')
-  }
+    e.preventDefault();
+    const term = q.trim();
+    navigate(term ? `/shop?search=${encodeURIComponent(term)}` : "/shop");
+  };
 
   return (
     <>
-      <header ref={headerRef} className={`header ${scrolled ? 'is-scrolled' : ''}`}>
+      <header
+        ref={headerRef}
+        className={`header ${scrolled ? "is-scrolled" : ""}`}
+      >
         <div className="header__inner">
           <button
             className="header__burger"
@@ -183,7 +204,13 @@ export default function Header() {
             {/* The badge contains the wordmark, so it needs no text beside it.
                 width/height are the rendered size, reserving the box before CSS
                 lands; styles.css owns the real dimensions. */}
-            <img src="/logo.svg" alt="Shoonya Farms" className="brand__mark" width="44" height="46" />
+            <img
+              src="/logo.svg"
+              alt="Shoonya Farms"
+              className="brand__mark"
+              width="44"
+              height="46"
+            />
           </Link>
 
           <div className="header__actions">
@@ -198,34 +225,58 @@ export default function Header() {
               />
             </form>
             <AccountMenu open={acctOpen} setOpen={setAcctOpen} />
-            <button className="cart-btn" onClick={openCart} aria-label={`Cart, ${count} items`}>
+            <button
+              className="cart-btn"
+              onClick={openCart}
+              aria-label={`Cart, ${count} items`}
+            >
               <CartIcon />
               {count > 0 && <span className="cart-btn__count">{count}</span>}
             </button>
           </div>
         </div>
-        <nav className={`nav ${menuOpen ? 'is-open' : ''}`}>
+        <nav className="nav nav--desktop">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`}
+              className={({ isActive }) =>
+                `nav__link ${isActive ? "is-active" : ""}`
+              }
             >
               {item.label}
             </NavLink>
           ))}
         </nav>
       </header>
+      <nav
+        className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
+        aria-hidden={!menuOpen}
+      >
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            tabIndex={menuOpen ? 0 : -1}
+            className={({ isActive }) =>
+              `nav__link ${isActive ? "is-active" : ""}`
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
       {/* Sibling of <header>, not a child. Inside it, the scrim would join the
           header's z-index:50 stacking context, where no z-index can put it
           beneath .header__inner — it covered the close button and the cart. Out
           here, header (50) simply beats scrim (40). */}
       <div
-        className={`nav__scrim ${menuOpen ? 'is-open' : ''}`}
+        className={`nav__scrim ${menuOpen ? "is-open" : ""}`}
         onClick={() => setMenuOpen(false)}
         aria-hidden="true"
       />
     </>
-  )
+  );
 }
