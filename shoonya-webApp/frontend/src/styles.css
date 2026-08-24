@@ -302,15 +302,22 @@ h4 {
 }
 .announce__track {
   display: flex;
-  gap: 3rem;
   width: max-content;
   padding: 0.55rem 0;
   animation: marquee 28s linear infinite;
+  /* Keeps the transform on the compositor. Mobile Chrome is much happier
+     running a long-lived infinite animation off the main thread. */
+  will-change: transform;
 }
 .announce__track span {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
+  /* The spacing used to be `gap: 3rem` on the track. A gap only sits *between*
+     items, so the duplicated second half started 3rem early and the -50%
+     wrap-around visibly jumped. A trailing margin on every span makes the two
+     halves exactly equal width, so -50% is precisely one half. */
+  margin-right: 3rem;
 }
 @keyframes marquee {
   from {
@@ -320,8 +327,16 @@ h4 {
     transform: translateX(-50%);
   }
 }
-.announce:hover .announce__track {
-  animation-play-state: paused;
+/* Pause-on-hover is a mouse affordance, and it has to be fenced off as one.
+   A touch screen leaves :hover applied to whatever was last touched, so a
+   scroll gesture that began anywhere on this bar latched the pause and froze
+   the marquee for the rest of the visit — with no way to release it except
+   tapping elsewhere. DevTools device mode suppresses :hover, which is why the
+   laptop's mobile view never showed this. */
+@media (hover: hover) and (pointer: fine) {
+  .announce:hover .announce__track {
+    animation-play-state: paused;
+  }
 }
 
 /* ============================================================
@@ -2609,15 +2624,22 @@ h4 {
     display: grid;
   }
   .nav {
-    /* Fixed positioning — standard drawer pattern. Anchored to the viewport
-       so it works regardless of whether the sticky header is currently stuck.
-       Top offset accounts for the header height; the announce bar scrolls away
-       naturally since it's not fixed. */
-    position: fixed;
-    top: var(--header-h);
-    right: 0;
-    left: 0;
-    bottom: auto;
+    /* Absolute against .header — which is `position: sticky`, so it is already a
+       positioned ancestor in every browser — with top:100%. The panel then meets
+       the header's real bottom edge, border included, whatever height the
+       announce bar above it happens to be.
+       Do not reach for `fixed` here again. A fixed panel resolves its offsets
+       against .header only because .header's backdrop-filter promotes it to a
+       containing block for fixed descendants. On phones whose browser drops
+       backdrop-filter that promotion never happens, the offset resolves against
+       the viewport instead, and at scroll-top — where the announce bar is still
+       pushing the header down — the panel lands ~68px from the top and covers
+       the header it is supposed to hang from. Desktop and DevTools device mode
+       both support backdrop-filter, which is why that bug only shows on a real
+       device. Body scroll is locked while the menu is open, so there is nothing
+       for an absolute panel to drift against. */
+    position: absolute;
+    inset: 100% 0 auto 0;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
@@ -2633,12 +2655,17 @@ h4 {
       transform 0.3s var(--ease),
       opacity 0.3s,
       visibility 0.3s;
-    /* Use the full viewport height minus the header height — the announce bar
-       is no longer in the calculation since we position from the header bottom. */
-    max-height: calc(100dvh - var(--header-h));
+    /* The header's bottom edge sits up to one announce bar below the viewport
+       top, so that has to come out of the budget too — otherwise a menu long
+       enough to hit the cap runs past the fold with its last item unreachable.
+       Header.jsx measures the real edge on open and sets --nav-max-h; the calc
+       is the fallback for the first frame and for no-JS. */
+    max-height: var(--nav-max-h, calc(100dvh - var(--header-h) - 6rem));
     overflow-y: auto;
     overscroll-behavior: contain;
-    z-index: 51; /* above header's backdrop-filter stacking context */
+    /* .header already carries z-index:50, which lifts this whole group above
+       the page. This only orders the panel against .header__inner. */
+    z-index: 1;
   }
   .nav.is-open {
     transform: translateY(0);

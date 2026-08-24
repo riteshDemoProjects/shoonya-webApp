@@ -111,6 +111,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [acctOpen, setAcctOpen] = useState(false)
   const [q, setQ] = useState('')
+  const headerRef = useRef(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -128,13 +129,31 @@ export default function Header() {
   // it drags the panel up and away from under the user's finger. Lock the body
   // while it's open, the same way CartDrawer does. Closing the menu — including
   // the route change above — runs the cleanup and releases the lock.
+  //
+  // The panel is absolute against the header, so CSS alone can't know how far
+  // down the viewport the header's bottom edge currently is — that depends on
+  // how much of the announce bar is still on screen. Measure it and hand the
+  // remaining height to the stylesheet, so a long menu always ends above the
+  // fold instead of running its last item off the bottom.
   useEffect(() => {
     if (!menuOpen) return undefined
     const onKey = (e) => e.key === 'Escape' && setMenuOpen(false)
+    const syncHeight = () => {
+      const el = headerRef.current
+      if (!el) return
+      const bottom = el.getBoundingClientRect().bottom
+      el.style.setProperty('--nav-max-h', `${Math.max(0, window.innerHeight - bottom)}px`)
+    }
+    syncHeight()
     document.addEventListener('keydown', onKey)
+    window.addEventListener('resize', syncHeight)
+    window.addEventListener('orientationchange', syncHeight)
     lockScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', syncHeight)
+      window.removeEventListener('orientationchange', syncHeight)
+      headerRef.current?.style.removeProperty('--nav-max-h')
       unlockScroll()
     }
   }, [menuOpen])
@@ -146,7 +165,7 @@ export default function Header() {
   }
 
   return (
-    <header className={`header ${scrolled ? 'is-scrolled' : ''}`}>
+    <header ref={headerRef} className={`header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="header__inner">
         <button
           className="header__burger"
