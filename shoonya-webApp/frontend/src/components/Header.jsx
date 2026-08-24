@@ -126,7 +126,6 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const [q, setQ] = useState("");
-  const headerRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -153,32 +152,12 @@ export default function Header() {
     const onTouchMove = (e) => {
       if (!e.target.closest(".nav--mobile")) e.preventDefault();
     };
-    const sync = () => {
-      const el = headerRef.current;
-      if (!el) return;
-      const bottom = el.getBoundingClientRect().bottom;
-      document.documentElement.style.setProperty(
-        "--nav-top",
-        `${Math.round(bottom)}px`,
-      );
-      document.documentElement.style.setProperty(
-        "--nav-max-h",
-        `${Math.max(0, Math.round(window.innerHeight - bottom))}px`,
-      );
-    };
-    sync();
     document.addEventListener("keydown", onKey);
-    window.addEventListener("resize", sync);
-    window.addEventListener("orientationchange", sync);
     document.addEventListener("touchmove", onTouchMove, { passive: false });
     lockScroll();
     return () => {
       document.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", sync);
-      window.removeEventListener("orientationchange", sync);
       document.removeEventListener("touchmove", onTouchMove);
-      document.documentElement.style.removeProperty("--nav-top");
-      document.documentElement.style.removeProperty("--nav-max-h");
       unlockScroll();
     };
   }, [menuOpen]);
@@ -191,10 +170,7 @@ export default function Header() {
 
   return (
     <>
-      <header
-        ref={headerRef}
-        className={`header ${scrolled ? "is-scrolled" : ""}`}
-      >
+      <header className={`header ${scrolled ? "is-scrolled" : ""}`}>
         <div className="header__inner">
           <button
             className="header__burger"
@@ -254,25 +230,25 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
+        <nav
+          className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
+          aria-hidden={!menuOpen}
+        >
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              tabIndex={menuOpen ? 0 : -1}
+              className={({ isActive }) =>
+                `nav__link ${isActive ? "is-active" : ""}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
-      <nav
-        className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
-        aria-hidden={!menuOpen}
-      >
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            tabIndex={menuOpen ? 0 : -1}
-            className={({ isActive }) =>
-              `nav__link ${isActive ? "is-active" : ""}`
-            }
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
       {/* Sibling of <header>, not a child. Inside it, the scrim would join the
           header's z-index:50 stacking context, where no z-index can put it
           beneath .header__inner — it covered the close button and the cart. Out
