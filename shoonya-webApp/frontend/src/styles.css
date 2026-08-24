@@ -2609,10 +2609,11 @@ h4 {
     display: grid;
   }
   .nav {
-    /* Absolute against .header — which is `position: sticky`, so it is already a
-       positioned ancestor — with top: var(--header-h). The panel then meets the
-       header's real bottom edge whatever height the announce bar above it happens to be. */
-    position: absolute;
+    /* Fixed positioning — standard drawer pattern. Anchored to the viewport
+       so it works regardless of whether the sticky header is currently stuck.
+       Top offset accounts for the header height; the announce bar scrolls away
+       naturally since it's not fixed. */
+    position: fixed;
     top: var(--header-h);
     right: 0;
     left: 0;
