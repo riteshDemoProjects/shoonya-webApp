@@ -2653,16 +2653,14 @@ h4 {
   }
   .nav--mobile {
     display: none;
-    position: absolute;
-    top: 100%;
-    right: auto;
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
     left: 0;
-    width: 50vw;
-    height: auto;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
-    padding: 0.75rem 1rem 1rem;
+    padding: 1rem;
     gap: 0.2rem;
     margin: 0;
     border-bottom: 1px solid var(--line);
@@ -2670,17 +2668,10 @@ h4 {
     max-height: calc(100dvh - var(--header-h));
     overflow-y: auto;
     overscroll-behavior: contain;
-    /* Let a vertical drag scroll the panel, but never hand the gesture to the
-       page behind it. */
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
-    z-index: 52;
+    z-index: 51;
   }
-  /* iOS Safari ignores `overflow:hidden` on <body>, so the page keeps scrolling
-     under an open menu no matter what scrollLock sets. A full-viewport scrim
-     with touch-action:none swallows those gestures at the source, and doubles as
-     the tap-to-dismiss target the panel was missing. Sits below the header (50)
-     so the close button, logo and cart stay reachable while it is up. */
   .nav__scrim {
     display: block;
     position: fixed;
