@@ -2688,7 +2688,7 @@ h4 {
        enough to hit the cap runs past the fold with its last item unreachable.
        Header.jsx measures the real edge on open and sets --nav-max-h; the calc
        is the fallback for the first frame and for no-JS. */
-    max-height: var(--nav-max-h, calc(100dvh - var(--header-h) - 6rem));
+    max-height: var(--nav-max-h, calc(100dvh - var(--header-h)));
     overflow-y: auto;
     overscroll-behavior: contain;
     /* Let a vertical drag scroll the panel, but never hand the gesture to the

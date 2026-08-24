@@ -154,8 +154,8 @@ export default function Header() {
       const el = headerRef.current;
       if (!el) return;
       const bottom = el.getBoundingClientRect().bottom;
-      el.style.setProperty("--nav-top", `${Math.round(bottom)}px`);
-      el.style.setProperty(
+      document.documentElement.style.setProperty("--nav-top", `${Math.round(bottom)}px`);
+      document.documentElement.style.setProperty(
         "--nav-max-h",
         `${Math.max(0, Math.round(window.innerHeight - bottom))}px`,
       );
@@ -171,9 +171,8 @@ export default function Header() {
       window.removeEventListener("resize", sync);
       window.removeEventListener("orientationchange", sync);
       window.removeEventListener("scroll", sync);
-      const el = headerRef.current;
-      el?.style.removeProperty("--nav-top");
-      el?.style.removeProperty("--nav-max-h");
+      document.documentElement.style.removeProperty("--nav-top");
+      document.documentElement.style.removeProperty("--nav-max-h");
       unlockScroll();
     };
   }, [menuOpen]);
