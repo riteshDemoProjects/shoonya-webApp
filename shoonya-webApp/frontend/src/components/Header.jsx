@@ -131,8 +131,10 @@ export default function Header() {
   const headerRef = useRef(null);
 
   useEffect(() => {
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+    setIsIOS(
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+    );
   }, []);
 
   useEffect(() => {
@@ -191,7 +193,10 @@ export default function Header() {
 
   return (
     <>
-      <header ref={headerRef} className={`header ${scrolled ? "is-scrolled" : ""}`}>
+      <header
+        ref={headerRef}
+        className={`header ${scrolled ? "is-scrolled" : ""}`}
+      >
         <div className="header__inner">
           <button
             className="header__burger"
@@ -251,46 +256,49 @@ export default function Header() {
             </NavLink>
           ))}
         </nav>
-        {!isIOS && <nav
-          className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
-          aria-hidden={!menuOpen}
-        >
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              tabIndex={menuOpen ? 0 : -1}
-              className={({ isActive }) =>
-                `nav__link ${isActive ? "is-active" : ""}`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>}
+        {!isIOS && (
+          <nav
+            className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
+            aria-hidden={!menuOpen}
+          >
+            {NAV.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                tabIndex={menuOpen ? 0 : -1}
+                className={({ isActive }) =>
+                  `nav__link ${isActive ? "is-active" : ""}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
       </header>
-      {isIOS && createPortal(
-        <nav
-          className={`nav nav--mobile nav--ios ${menuOpen ? "is-open" : ""}`}
-          aria-hidden={!menuOpen}
-        >
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              tabIndex={menuOpen ? 0 : -1}
-              className={({ isActive }) =>
-                `nav__link ${isActive ? "is-active" : ""}`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>,
-        document.body,
-      )}
+      {isIOS &&
+        createPortal(
+          <nav
+            className={`nav nav--mobile nav--ios ${menuOpen ? "is-open" : ""}`}
+            aria-hidden={!menuOpen}
+          >
+            {NAV.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                tabIndex={menuOpen ? 0 : -1}
+                className={({ isActive }) =>
+                  `nav__link ${isActive ? "is-active" : ""}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>,
+          document.body,
+        )}
       {/* Sibling of <header>, not a child. Inside it, the scrim would join the
           header's z-index:50 stacking context, where no z-index can put it
           beneath .header__inner — it covered the close button and the cart. Out
