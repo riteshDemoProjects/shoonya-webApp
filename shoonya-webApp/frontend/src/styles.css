@@ -2610,14 +2610,13 @@ h4 {
   }
   .nav {
     /* Absolute against .header — which is `position: sticky`, so it is already a
-       positioned ancestor — with top:100%. The panel then meets the header's
-       real bottom edge whatever height the announce bar above it happens to be.
-       This was `fixed` with a hardcoded `calc(var(--header-h))` offset, which
-       only landed in the right place because .header's backdrop-filter happens
-       to promote it to a containing block for fixed descendants; where
-       backdrop-filter is unsupported the panel fell behind the announce bar. */
+       positioned ancestor — with top: var(--header-h). The panel then meets the
+       header's real bottom edge whatever height the announce bar above it happens to be. */
     position: absolute;
-    inset: 100% 0 auto 0;
+    top: var(--header-h);
+    right: 0;
+    left: 0;
+    bottom: auto;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
@@ -2633,13 +2632,12 @@ h4 {
       transform 0.3s var(--ease),
       opacity 0.3s,
       visibility 0.3s;
-    /* The header's bottom edge sits up to one announce bar (~88px) below the
-       viewport top, so that has to come out of the budget too — otherwise a
-       menu long enough to hit the cap would run past the fold with its last
-       item unreachable. */
-    max-height: calc(100dvh - var(--header-h) - 6rem);
+    /* Use the full viewport height minus the header height — the announce bar
+       is no longer in the calculation since we position from the header bottom. */
+    max-height: calc(100dvh - var(--header-h));
     overflow-y: auto;
     overscroll-behavior: contain;
+    z-index: 51; /* above header's backdrop-filter stacking context */
   }
   .nav.is-open {
     transform: translateY(0);

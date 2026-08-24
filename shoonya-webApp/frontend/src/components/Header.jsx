@@ -164,19 +164,6 @@ export default function Header() {
           <img src="/logo.svg" alt="Shoonya Farms" className="brand__mark" width="44" height="46" />
         </Link>
 
-        <nav className={`nav ${menuOpen ? 'is-open' : ''}`}>
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
         <div className="header__actions">
           <form className="search" onSubmit={submitSearch} role="search">
             <SearchIcon className="search__icon" />
@@ -195,6 +182,18 @@ export default function Header() {
           </button>
         </div>
       </div>
+      <nav className={`nav ${menuOpen ? 'is-open' : ''}`}>
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) => `nav__link ${isActive ? 'is-active' : ''}`}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
     </header>
   )
 }
