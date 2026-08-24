@@ -2653,25 +2653,17 @@ h4 {
   }
   .nav--mobile {
     display: flex;
-    /* Fixed against the viewport, at a top offset Header.jsx measures from the
-       header's real bottom edge. This is only safe because .header no longer
-       carries backdrop-filter (see .header::before) — nothing in the ancestor
-       chain establishes a containing block, so the offset resolves against the
-       viewport on every engine including iOS Safari.
-       Fixed rather than absolute deliberately: `overflow:hidden` on <body> does
-       not reliably stop scrolling in iOS Safari, so an absolutely-positioned
-       panel anchored to the sticky header drifts out from under the user's
-       finger when the lock leaks. A viewport-anchored panel cannot drift, and
-       .nav__scrim below absorbs the touches that would have scrolled. */
+     /* A full-screen layer avoids iOS Safari delaying a fixed sibling panel
+       until the next gesture. The header remains above it; links start below
+       the measured header edge. */
     position: fixed;
-    top: var(--nav-top, var(--header-h));
-    right: 0;
-    left: 0;
-    bottom: auto;
+     inset: 0;
+     height: 100dvh;
+     z-index: 45;
     flex-direction: column;
     align-items: stretch;
     background: var(--paper);
-    padding: 1rem;
+     padding: calc(var(--nav-top, var(--header-h)) + 1rem) 1rem 1rem;
     gap: 0.2rem;
     margin: 0;
     border-bottom: 1px solid var(--line);
@@ -2684,12 +2676,7 @@ h4 {
       opacity 0.3s,
       visibility 0.3s;
     pointer-events: none;
-    /* The header's bottom edge sits up to one announce bar below the viewport
-       top, so that has to come out of the budget too — otherwise a menu long
-       enough to hit the cap runs past the fold with its last item unreachable.
-       Header.jsx measures the real edge on open and sets --nav-max-h; the calc
-       is the fallback for the first frame and for no-JS. */
-    max-height: var(--nav-max-h, calc(100dvh - var(--header-h)));
+     max-height: none;
     overflow-y: auto;
     overscroll-behavior: contain;
     /* Let a vertical drag scroll the panel, but never hand the gesture to the
