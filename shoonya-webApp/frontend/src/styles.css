@@ -329,16 +329,6 @@ h4 {
     transform: translateX(calc(-1 * var(--marquee-shift, 50%)));
   }
 }
-/* Reduced-motion presentation: one message at a time, swapped on a timer by
-   AnnounceBar.jsx. Matches the marquee's vertical rhythm so the bar keeps its
-   height either way. */
-.announce__rotator {
-  padding: 0.55rem 1rem;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 /* Pause-on-hover is a mouse affordance, and it has to be fenced off as one.
    A touch screen leaves :hover applied to whatever was last touched, so a
    scroll gesture that began anywhere on this bar latched the pause and froze
@@ -2666,8 +2656,8 @@ h4 {
        panel anchored to the sticky header drifts out from under the user's
        finger when the lock leaks. A viewport-anchored panel cannot drift, and
        .nav__scrim below absorbs the touches that would have scrolled. */
-    position: fixed;
-    top: var(--nav-top, var(--header-h));
+    position: absolute;
+    top: 100%;
     right: 0;
     left: 0;
     bottom: auto;
@@ -2856,14 +2846,6 @@ h4 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
-  }
-  /* Belt-and-braces: the track is not even rendered under reduced motion
-     (AnnounceBar.jsx swaps in .announce__rotator instead), but if the
-     preference flips mid-session before React re-renders, make sure no
-     half-scrolled frame is left on screen. */
-  .announce__track {
-    animation: none;
-    transform: none;
   }
 }
 
