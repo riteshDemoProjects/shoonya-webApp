@@ -1,55 +1,58 @@
-import { useEffect } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import Header from './components/Header'
-import Footer from './components/Footer'
-import AnnounceBar from './components/AnnounceBar'
-import CartDrawer from './components/CartDrawer'
-import Toast from './components/Toast'
-import RequireAuth from './components/RequireAuth'
-import Home from './pages/Home'
-import Shop from './pages/Shop'
-import ProductDetail from './pages/ProductDetail'
-import Checkout from './pages/Checkout'
-import OrderConfirmation from './pages/OrderConfirmation'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Account from './pages/Account'
-import AccountOrders from './pages/AccountOrders'
-import AccountProfile from './pages/AccountProfile'
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import AnnounceBar from "./components/AnnounceBar";
+import CartDrawer from "./components/CartDrawer";
+import Toast from "./components/Toast";
+import RequireAuth from "./components/RequireAuth";
+import Home from "./pages/Home";
+import Shop from "./pages/Shop";
+import ProductDetail from "./pages/ProductDetail";
+import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Account from "./pages/Account";
+import AccountOrders from "./pages/AccountOrders";
+import AccountProfile from "./pages/AccountProfile";
 
 // Scroll to top on navigation, or to the #hash target when present.
 function ScrollManager() {
-  const { pathname, hash } = useLocation()
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    let frame
-    let timer
-    let attempts = 0
+    let frame;
+    let timer;
+    let attempts = 0;
     const scrollToTarget = () => {
       if (hash) {
-        const target = document.getElementById(hash.slice(1))
+        const target = document.getElementById(hash.slice(1));
         if (target) {
-          const header = document.querySelector('.header')
-          const offset = header?.getBoundingClientRect().height || 0
-          const targetTop = target.getBoundingClientRect().top + window.scrollY
-          window.scrollTo({ top: Math.max(0, targetTop - offset), behavior: 'auto' })
-          return
+          const header = document.querySelector(".header");
+          const offset = header?.getBoundingClientRect().height || 0;
+          const targetTop = target.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({
+            top: Math.max(0, targetTop - offset),
+            behavior: "auto",
+          });
+          return;
         }
         if (attempts++ < 60) {
-          frame = requestAnimationFrame(scrollToTarget)
-          return
+          frame = requestAnimationFrame(scrollToTarget);
+          return;
         }
       }
-      window.scrollTo({ top: 0, behavior: 'auto' })
-    }
+      window.scrollTo({ top: 0, behavior: "auto" });
+    };
     timer = window.setTimeout(() => {
-      frame = requestAnimationFrame(scrollToTarget)
-    }, 100)
+      frame = requestAnimationFrame(scrollToTarget);
+    }, 100);
     return () => {
-      window.clearTimeout(timer)
-      cancelAnimationFrame(frame)
-    }
-  }, [pathname, hash])
-  return null
+      window.clearTimeout(timer);
+      cancelAnimationFrame(frame);
+    };
+  }, [pathname, hash]);
+  return null;
 }
 
 function NotFound() {
@@ -57,10 +60,14 @@ function NotFound() {
     <div className="empty-state empty-state--page">
       <div className="empty-state__mark">🌾</div>
       <h3>Page not found</h3>
-      <p className="muted">The page you're looking for has wandered off the farm.</p>
-      <a href="/" className="btn btn--primary">Back home</a>
+      <p className="muted">
+        The page you're looking for has wandered off the farm.
+      </p>
+      <a href="/" className="btn btn--primary">
+        Back home
+      </a>
     </div>
-  )
+  );
 }
 
 export default function App() {
@@ -83,7 +90,10 @@ export default function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order/:orderNumber" element={<OrderConfirmation />} />
             <Route path="/account" element={<Account />}>
-              <Route index element={<Navigate to="/account/orders" replace />} />
+              <Route
+                index
+                element={<Navigate to="/account/orders" replace />}
+              />
               <Route path="orders" element={<AccountOrders />} />
               <Route path="profile" element={<AccountProfile />} />
             </Route>
@@ -96,5 +106,5 @@ export default function App() {
       <CartDrawer />
       <Toast />
     </>
-  )
+  );
 }
