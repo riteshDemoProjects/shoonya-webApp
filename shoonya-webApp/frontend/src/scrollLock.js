@@ -14,11 +14,19 @@
 // overflow-x guard on <body> too.
 let locks = 0;
 let restoreTo = "";
+let restoreOverscroll = "";
 
 export function lockScroll() {
   if (locks === 0) {
     restoreTo = document.body.style.overflow;
+    restoreOverscroll = document.body.style.overscrollBehaviorY;
     document.body.style.overflow = "hidden";
+    // overflow:hidden alone does not stop iOS Safari from rubber-banding the
+    // document behind an open overlay — the bounce still runs and drags the
+    // whole page (including the overlay) with it. Suppressing the vertical
+    // overscroll for the duration of the lock is what actually pins it. Only
+    // while locked: leaving it on permanently would kill pull-to-refresh.
+    document.body.style.overscrollBehaviorY = "none";
   }
   locks += 1;
 }
@@ -26,5 +34,8 @@ export function lockScroll() {
 export function unlockScroll() {
   if (locks === 0) return; // already balanced — never go negative
   locks -= 1;
-  if (locks === 0) document.body.style.overflow = restoreTo;
+  if (locks === 0) {
+    document.body.style.overflow = restoreTo;
+    document.body.style.overscrollBehaviorY = restoreOverscroll;
+  }
 }

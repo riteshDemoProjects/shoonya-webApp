@@ -126,6 +126,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const [q, setQ] = useState("");
+  const headerRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -133,6 +134,52 @@ export default function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // --nav-top is the mobile menu panel's fixed anchor: the header's measured
+  // bottom edge, *including* the announce bar above it. The header is sticky
+  // below the announce bar, so its bottom is ~157px at the top of the page but
+  // only var(--header-h) once the announce bar has scrolled away — measuring
+  // beats assuming, but it has to be re-measured as that gap closes.
+  //
+  // Scroll is in the listener list because the header's *position* changes
+  // while its size does not, so ResizeObserver alone never fires for it — the
+  // anchor would stay pinned at its first-paint value and the panel would open
+  // a scrim-coloured gap below the header. menuOpen is a dependency so the
+  // value is always freshly measured at the moment the panel appears.
+  useEffect(() => {
+    const header = headerRef.current;
+    if (!header) return undefined;
+    let frame = 0;
+    const sync = () => {
+      const bottom = header.getBoundingClientRect().bottom;
+      if (bottom > 0)
+        document.documentElement.style.setProperty(
+          "--nav-top",
+          `${Math.round(bottom)}px`,
+        );
+    };
+    // rAF-coalesced: scroll fires far more often than layout needs updating.
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        sync();
+      });
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(header);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("orientationchange", onScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      ro.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("orientationchange", onScroll);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -154,12 +201,13 @@ export default function Header() {
   const submitSearch = (e) => {
     e.preventDefault();
     const term = q.trim();
+    setMenuOpen(false);
     navigate(term ? `/shop?search=${encodeURIComponent(term)}` : "/shop");
   };
 
   return (
     <>
-      <header className={`header ${scrolled ? "is-scrolled" : ""}`}>
+      <header className={`header ${scrolled ? "is-scrolled" : ""}`} ref={headerRef}>
         <div className="header__inner">
           <button
             className="header__burger"
@@ -224,6 +272,24 @@ export default function Header() {
           className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
           aria-hidden={!menuOpen}
         >
+          {/* The header's search input is hidden under 720px — there is no room
+              for it beside the burger, brand and cart. This is the same form
+              given full width inside the panel, so phones keep search at all. */}
+          <form
+            className="search nav__search"
+            onSubmit={submitSearch}
+            role="search"
+          >
+            <SearchIcon className="search__icon" />
+            <input
+              type="search"
+              placeholder="Search staples…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              tabIndex={menuOpen ? 0 : -1}
+              aria-label="Search products"
+            />
+          </form>
           {NAV.map((item) => (
             <NavLink
               key={item.to}
