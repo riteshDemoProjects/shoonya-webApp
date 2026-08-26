@@ -290,6 +290,10 @@
   height: 40px;
   border-radius: 50%;
   color: var(--forest);
+  /* cursor:pointer is required on iOS Safari for non-anchor interactive elements.
+     Without it iOS does not treat the element as immediately clickable and
+     introduces a significant tap delay (sometimes 15+ seconds). */
+  cursor: pointer;
   transition:
     background-color var(--t) var(--ease),
     transform var(--t-fast) var(--ease);

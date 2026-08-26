@@ -180,7 +180,7 @@ export default function Header() {
     setAcctOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
-  // Lock body scroll while menu is open (works on iOS + Android)
+  // Lock body scroll while menu is open
   useEffect(() => {
     if (!menuOpen) return undefined;
     const onKey = (e) => e.key === "Escape" && setMenuOpen(false);
@@ -202,14 +202,19 @@ export default function Header() {
   return (
     <>
       <header className={`header ${scrolled ? "is-scrolled" : ""}`} ref={headerRef}>
-        {/* One row: burger (touch only), brand, nav, actions. The nav used to be
-            a second 41px band below this one; folding it in cost 45px of fixed
-            chrome on every page. */}
+        {/* One row: burger (touch only), brand, nav, actions. */}
         <div className="header__inner">
           <button
             className="header__burger icon-btn"
             aria-label="Menu"
             aria-expanded={menuOpen}
+            onTouchStart={(e) => {
+              // Fire immediately on touch — iOS Safari delays synthetic click
+              // events on elements it deems non-interactive. onTouchStart fires
+              // before any delay logic and lets the menu respond instantly.
+              e.preventDefault(); // stops the subsequent click from double-firing
+              setMenuOpen((v) => !v);
+            }}
             onClick={() => setMenuOpen((v) => !v)}
           >
             {menuOpen ? (
@@ -220,9 +225,6 @@ export default function Header() {
           </button>
 
           <Link to="/" className="brand" aria-label="Shoonya Farms home">
-            {/* The badge contains the wordmark, so it needs no text beside it.
-                width/height are the rendered size, reserving the box before CSS
-                lands; the stylesheet owns the real dimensions. */}
             <img
               src="/logo.svg"
               alt="Shoonya Farms"
@@ -270,49 +272,58 @@ export default function Header() {
             </button>
           </div>
         </div>
-
-        <nav
-          className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
-          aria-hidden={!menuOpen}
-        >
-          {/* The header's search input is hidden under 1025px — there is no room
-              for it beside the burger, brand and cart. This is the same form
-              given full width inside the panel, so small screens keep search. */}
-          <form
-            className="search nav__search"
-            onSubmit={submitSearch}
-            role="search"
-          >
-            <SearchIcon className="search__icon" aria-hidden="true" />
-            <input
-              type="search"
-              placeholder="Search staples…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              tabIndex={menuOpen ? 0 : -1}
-              aria-label="Search products"
-            />
-          </form>
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              tabIndex={menuOpen ? 0 : -1}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                `nav__link ${isActive ? "is-active" : ""}`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
       </header>
-      {/* Sibling of <header>, not a child. Inside it, the scrim would join the
-          header's z-index:50 stacking context, where no z-index can put it
-          beneath .header__inner — it covered the close button and the cart. Out
-          here, header (50) simply beats scrim (40). */}
+
+      {/*
+        nav--mobile and nav__scrim are siblings of <header>, NOT children.
+
+        iOS Safari bug: any element that has backdrop-filter applied (even via a
+        ::before pseudo-element) creates a new compositing layer. Any
+        `position: fixed` descendant of that layer is clipped to the ancestor's
+        bounds and positioned relative to it — not the viewport. This made the
+        mobile nav panel invisible (clipped away below the header) on real
+        iPhones, even though it worked fine in Chrome DevTools device mode.
+
+        Moving both elements outside <header> entirely is the correct fix.
+        z-index: header=50, nav__scrim=40, nav--mobile=51 keeps the layering
+        correct: scrim sits below the header, panel sits above it.
+      */}
+      <nav
+        className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
+        aria-hidden={!menuOpen}
+      >
+        {/* Search moves out of the header bar and into the panel on mobile. */}
+        <form
+          className="search nav__search"
+          onSubmit={submitSearch}
+          role="search"
+        >
+          <SearchIcon className="search__icon" aria-hidden="true" />
+          <input
+            type="search"
+            placeholder="Search staples…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            tabIndex={menuOpen ? 0 : -1}
+            aria-label="Search products"
+          />
+        </form>
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            tabIndex={menuOpen ? 0 : -1}
+            onClick={() => setMenuOpen(false)}
+            className={({ isActive }) =>
+              `nav__link ${isActive ? "is-active" : ""}`
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
       <div
         className={`nav__scrim ${menuOpen ? "is-open" : ""}`}
         onClick={() => setMenuOpen(false)}

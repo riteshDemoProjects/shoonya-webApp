@@ -80,15 +80,14 @@
     box-shadow var(--t) var(--ease),
     border-color var(--t) var(--ease);
 }
-/* The translucent blur lives on a pseudo-element, not on .header itself, and it
-   has to stay there. An element carrying `backdrop-filter` becomes the
-   containing block for its `position: fixed` descendants, and WebKit also clips
-   descendants that overflow its box. .header contains the mobile nav panel,
-   which hangs entirely *below* the header — so with the filter on .header, iOS
-   Safari clipped the panel away and mispositioned any fixed offset. A
-   pseudo-element has no descendants, so it can carry the filter harmlessly.
-   Blink/Gecko tolerated the old arrangement, which is why this only ever
-   reproduced on a real iPhone and never in DevTools device mode. */
+/* The translucent blur lives on a pseudo-element so it never becomes the
+   containing block for any descendant. On iOS Safari an element with
+   backdrop-filter creates a compositing layer that clips and repositions any
+   `position: fixed` child relative to itself instead of the viewport — the
+   mobile nav panel was invisible on real iPhones because of this. A
+   pseudo-element has no children, so it carries the filter safely.
+   nav--mobile is now a sibling of <header> (not a child), which is the
+   definitive fix; the pseudo-element approach is kept as defence-in-depth. */
 .header::before {
   content: "";
   position: absolute;
@@ -775,11 +774,11 @@
   .nav--desktop {
     display: none;
   }
-  /* Anchored to --nav-top, the header's real measured bottom edge, rather than
-     a hardcoded var(--header-h). The header is sticky *below* the announce
-     bar, so at the top of the page its bottom is the announce height + 64, not
-     64 — the old fixed offset tucked the panel underneath the header.
-     Header.jsx keeps the variable in sync on scroll and resize. */
+  /* nav--mobile is a sibling of <header> in the DOM (not a child), so its
+     `position: fixed` resolves against the viewport on all browsers including
+     iOS Safari. --nav-top is kept in sync by Header.jsx on every scroll/resize
+     so the panel always opens flush against the header's real bottom edge,
+     including when the announce bar is visible above it. */
   .nav--mobile {
     display: flex;
     position: fixed;
@@ -800,12 +799,9 @@
     overscroll-behavior: contain;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
+    /* 51 > header (50) so the panel overlaps the header bottom border,
+       but scrim (40) sits behind the header so the burger stays tappable. */
     z-index: 51;
-    /* Was toggled with `display`, which cannot transition — the panel snapped
-       in. Transform + opacity animate on the compositor, and `visibility`
-       (not `display`) keeps it out of the a11y tree and off the tab order
-       between states while still allowing the fade. The links themselves are
-       already given tabIndex -1 and the nav aria-hidden by Header.jsx. */
     visibility: hidden;
     opacity: 0;
     transform: translateY(-8px);
@@ -827,7 +823,12 @@
     background: rgba(30, 49, 34, 0.26);
     opacity: 0;
     visibility: hidden;
-    touch-action: none;
+    /* cursor:pointer is required on iOS Safari. Without it, iOS does not
+       consider this a "clickable" element, so the synthetic React onClick
+       (which attaches to #root, not the element itself) is not seen by iOS
+       as a direct handler — causing iOS to wait 15-20 seconds before firing
+       the click event. cursor:pointer tells iOS "this is interactive". */
+    cursor: pointer;
     transition:
       opacity var(--t-slow) var(--ease),
       visibility var(--t-slow) var(--ease);
@@ -835,6 +836,7 @@
   .nav__scrim.is-open {
     opacity: 1;
     visibility: visible;
+    touch-action: none;
   }
   /* Left-aligned full-width rows at the 44px fingertip minimum. The active
      item gets a rule on its leading edge rather than the desktop underline —

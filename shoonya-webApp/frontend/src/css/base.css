@@ -14,11 +14,10 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  /* Deliberately no `scrollbar-gutter: stable` here. It would smooth over the
-     15px sideways nudge when an overlay locks body scroll on a desktop window,
-     but it measurably reflows the desktop page and that view is the known-good
-     reference. It buys nothing on real phones either, where scrollbars are
-     overlays and locking reclaims no width. */
+  /* Clip horizontal overflow at the root so no element can cause a horizontal
+     scrollbar or rubber-band. clip (not hidden) so <html> does NOT become a
+     scroll container — hidden would break the sticky header. */
+  overflow-x: clip;
 }
 
 body {
@@ -30,17 +29,11 @@ body {
   line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Backstop only — every known overflow is fixed at its source. Two reasons it
-     lives here and not on <html>: `clip` rather than `hidden` because `hidden`
-     would make this a scroll container and break the sticky header, and on
-     <body> rather than <html> because overflow only propagates to the viewport
-     from <body> while <html> is still `visible` — setting anything on <html>
-     would cut off that propagation and disable the scroll lock. */
-  overflow-x: clip;
-  /* Kills the horizontal rubber-band on iOS/Android without touching the
-     vertical one. `none` on both axes would break pull-to-refresh, which is a
-     gesture people expect on a storefront; only the sideways bounce (which
-     reveals a blank gutter beside a full-bleed section) is unwanted. */
+  /* overflow-x is on <html> above. Do NOT set overflow on <body> here —
+     any overflow value on <body> (including clip) makes <body> a scroll
+     container on iOS Safari, which breaks the sticky header and causes
+     extra scrollable space at the bottom of the page after scroll-lock
+     is released. */
   overscroll-behavior-x: none;
 }
 
