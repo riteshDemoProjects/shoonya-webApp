@@ -69,7 +69,7 @@ export default function ProductCard({ product }) {
             onClick={handleAdd}
             aria-label={`Add ${product.name} to cart`}
           >
-            {added ? <CheckIcon /> : <PlusIcon />}
+            {added ? <CheckIcon aria-hidden="true" /> : <PlusIcon aria-hidden="true" />}
           </button>
         </div>
       </div>

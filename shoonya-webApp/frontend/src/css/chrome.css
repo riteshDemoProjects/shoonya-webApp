@@ -1,0 +1,980 @@
+/* ============================================================
+   Site chrome — announce bar, header, navigation, footer
+   ============================================================ */
+
+/* ---------- announcement bar ----------
+   Two slim rows totalling ~56px, down from ~70. The disclaimer keeps a tinted
+   background because it is a disclaimer; the marquee is set at 12px so it reads
+   as a whisper above the header rather than a second navigation band. */
+.announce {
+  background: var(--forest-deep);
+  color: var(--on-dark-muted);
+  overflow: hidden;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.02em;
+}
+.announce__notice {
+  padding: 0.375rem var(--s2);
+  color: #6b4b13;
+  background: #f2e2b6;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+}
+.announce__track {
+  display: flex;
+  width: max-content;
+  padding: 0.4375rem 0;
+  animation: marquee 28s linear infinite;
+  /* Keeps the transform on the compositor. Mobile Chrome is much happier
+     running a long-lived infinite animation off the main thread. */
+  will-change: transform;
+}
+.announce__track span {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  /* The spacing used to be `gap: 3rem` on the track. A gap only sits *between*
+     items, so the duplicated second half started 3rem early and the -50%
+     wrap-around visibly jumped. A trailing margin on every span makes the two
+     halves exactly equal width, so -50% is precisely one half. */
+  margin-right: var(--s5);
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* AnnounceBar.jsx measures the track's half-width and sets --marquee-shift
+       in px. The 50% fallback covers the first frame before that lands. */
+    transform: translateX(calc(-1 * var(--marquee-shift, 50%)));
+  }
+}
+/* Pause-on-hover is a mouse affordance, and it has to be fenced off as one.
+   A touch screen leaves :hover applied to whatever was last touched, so a
+   scroll gesture that began anywhere on this bar latched the pause and froze
+   the marquee for the rest of the visit — with no way to release it except
+   tapping elsewhere. DevTools device mode suppresses :hover, which is why the
+   laptop's mobile view never showed this. */
+@media (hover: hover) and (pointer: fine) {
+  .announce:hover .announce__track {
+    animation-play-state: paused;
+  }
+}
+
+/* ============================================================
+   Header — one 64px band
+   ------------------------------------------------------------
+   Previously two stacked bands (68px of controls + a 41px nav row) for 109px
+   of fixed chrome on every page. Brand, nav and actions now share a single
+   row, and the nav collapses into the drawer at 1024px rather than 720px so
+   tablets get the same compact header instead of a squeezed six-item row.
+   ============================================================ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid transparent;
+  transition:
+    box-shadow var(--t) var(--ease),
+    border-color var(--t) var(--ease);
+}
+/* The translucent blur lives on a pseudo-element, not on .header itself, and it
+   has to stay there. An element carrying `backdrop-filter` becomes the
+   containing block for its `position: fixed` descendants, and WebKit also clips
+   descendants that overflow its box. .header contains the mobile nav panel,
+   which hangs entirely *below* the header — so with the filter on .header, iOS
+   Safari clipped the panel away and mispositioned any fixed offset. A
+   pseudo-element has no descendants, so it can carry the filter harmlessly.
+   Blink/Gecko tolerated the old arrangement, which is why this only ever
+   reproduced on a real iPhone and never in DevTools device mode. */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(252, 251, 247, 0.88);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+.header.is-scrolled {
+  border-color: var(--line-soft);
+  box-shadow: var(--shadow-xs);
+}
+.header__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  /* The insets are added to the gutter rather than replacing it: in landscape
+     on a notched iPhone the inset is ~44px on the sensor side, and without
+     this the burger and cart sit underneath the rounded corner. */
+  padding-left: calc(var(--gutter) + var(--sal));
+  padding-right: calc(var(--gutter) + var(--sar));
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+/* The mark is the "Seal of Purity" badge, a portrait 209:220 lockup that
+   already carries its own "shoonya" wordmark — legible from about 40px up.
+   So it stands alone: a second text wordmark beside it read "shoonya
+   Shoonya Farms". The link's aria-label supplies the accessible name. */
+.brand__mark {
+  height: 42px;
+  width: auto;
+  transition: transform var(--t) var(--ease);
+}
+/* The badge's navy frame and navy wordmark nearly vanish against
+   --forest-deep, so on the dark footer the seal sits on a warm-white chip
+   rather than shipping a second, hand-recoloured copy of the artwork.
+   Height is 34 + 2*4 because box-sizing is border-box globally — that keeps
+   the artwork itself 34px, which is all the compact footer needs. */
+.brand--light .brand__mark {
+  height: 42px;
+  padding: 4px;
+  background: var(--paper);
+  border-radius: 10px;
+}
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  margin-left: auto;
+}
+.header__burger {
+  display: none;
+  margin-left: -0.5rem;
+}
+
+/* ---------- navigation ---------- */
+.nav {
+  display: flex;
+  align-items: center;
+}
+.nav--desktop {
+  gap: 0.125rem;
+  margin-left: var(--s2);
+}
+.nav--mobile {
+  display: none;
+}
+/* Only exists for the mobile drawer; the 1024px query turns it on. */
+.nav__scrim {
+  display: none;
+}
+/* No pill, no background swap — a 1px rule under the active item is all the
+   signal a six-item nav needs, and it keeps the band visually quiet. */
+.nav__link {
+  position: relative;
+  padding: 0.5rem 0.75rem;
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--ink);
+  transition: color var(--t) var(--ease);
+}
+.nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.125rem;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t) var(--ease);
+}
+.nav__link.is-active {
+  color: var(--forest);
+  font-weight: 500;
+}
+.nav__link.is-active::after {
+  transform: scaleX(1);
+}
+
+/* ============================================================
+   Account menu (header)
+   ============================================================ */
+.acct {
+  position: relative;
+}
+.acct__placeholder {
+  width: 40px;
+  height: 40px;
+}
+.acct__btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--paper);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition:
+    background-color var(--t) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.acct__btn:active {
+  transform: scale(0.94);
+}
+/* Shown in place of the monogram when the name has no letters to take. */
+.acct__btn svg {
+  width: 20px;
+  height: 20px;
+}
+.acct__login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  padding: 0.5rem 0.875rem 0.5rem 0.75rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  color: var(--forest);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    border-color var(--t) var(--ease),
+    background-color var(--t) var(--ease);
+}
+.acct__login svg {
+  width: 18px;
+  height: 18px;
+}
+.acct__menu {
+  position: absolute;
+  top: calc(100% + 0.625rem);
+  right: 0;
+  z-index: 70;
+  min-width: 224px;
+  padding: 0.375rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-md);
+  animation: acct-in var(--t-fast) var(--ease);
+}
+@keyframes acct-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.acct__head {
+  display: flex;
+  flex-direction: column;
+  padding: 0.625rem 0.75rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--line-soft);
+  line-height: 1.45;
+}
+.acct__head strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.acct__head span {
+  font-size: var(--fs-xs);
+  overflow-wrap: anywhere;
+}
+.acct__item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 8px;
+  font-size: var(--fs-sm);
+  text-align: left;
+  color: var(--ink);
+  transition:
+    background-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.acct__item svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.acct__item--out,
+.acct__item--out svg {
+  color: var(--danger);
+}
+
+/* ============================================================
+   Footer — five columns, one bar
+   ------------------------------------------------------------
+   Was 399px on desktop / 731px on a phone. The logo drops from 56px to 42px,
+   links from 14.4px to 14px on a tighter leading, the badge row folds into one
+   line of text inside the brand column, and the newsletter and social icons
+   are absorbed without adding a row. On mobile the three link columns become
+   accordions, which is where most of the height went.
+   ============================================================ */
+.footer {
+  background: var(--forest-deep);
+  color: var(--on-dark-muted);
+  margin-top: var(--s5);
+}
+.footer__inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1.7fr;
+  gap: var(--s4) var(--s3);
+  padding: var(--s5) calc(var(--gutter) + var(--sar)) var(--s4)
+    calc(var(--gutter) + var(--sal));
+}
+.footer__brand {
+  max-width: 22rem;
+}
+.footer__tag {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--on-dark-muted);
+  margin-top: var(--s2);
+}
+/* The three trust claims used to be pill chips on their own row. As one line
+   of interpuncted text they say exactly the same thing in 22px instead of 62. */
+.footer__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 0.625rem;
+  margin-top: var(--s2);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8f9a87;
+}
+.footer__badges span:not(:last-child)::after {
+  content: "·";
+  margin-left: 0.625rem;
+}
+
+.footer__col > summary {
+  list-style: none;
+  cursor: default;
+}
+.footer__colhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+}
+.footer__colhead h4 {
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.footer__colhead svg {
+  display: none;
+  color: var(--on-dark-muted);
+  transition: transform var(--t) var(--ease);
+}
+.footer__links {
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--s1);
+}
+.footer__links a,
+.footer__links p {
+  display: block;
+  color: var(--on-dark-muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  padding: 0.3125rem 0;
+  transition: color var(--t) var(--ease);
+}
+.footer__note {
+  color: #7d8876;
+  font-size: var(--fs-xs) !important;
+}
+
+/* ---------- newsletter ---------- */
+.newsletter__sell {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  margin-top: var(--s1);
+  color: var(--on-dark-muted);
+}
+.newsletter__form {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: var(--s2);
+  padding: 0.25rem 0.25rem 0.25rem 1rem;
+  background: rgba(243, 241, 233, 0.07);
+  border: 1px solid var(--on-dark-line);
+  border-radius: var(--r-pill);
+  transition: border-color var(--t) var(--ease);
+}
+.newsletter__form:focus-within {
+  border-color: rgba(243, 241, 233, 0.45);
+}
+.newsletter__form input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--on-dark);
+  font-size: var(--fs-sm);
+}
+.newsletter__form input::placeholder {
+  color: #7d8876;
+}
+.newsletter__form button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--forest-deep);
+  transition:
+    background-color var(--t) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.newsletter__form button:active {
+  transform: scale(0.94);
+}
+.newsletter__msg {
+  margin-top: 0.625rem;
+  font-size: var(--fs-xs);
+  color: var(--ochre);
+}
+
+/* ---------- bottom bar ---------- */
+.footer__bar {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s3);
+  border-top: 1px solid var(--on-dark-line);
+  padding: var(--s2) calc(var(--gutter) + var(--sar)) var(--s2)
+    calc(var(--gutter) + var(--sal));
+  /* Last element on the page: the home-indicator pill would otherwise sit on
+     top of the legal links. Padding, not margin, so the dark background still
+     bleeds into the inset instead of showing a cream strip under it. */
+  padding-bottom: calc(var(--s2) + var(--sab));
+  font-size: var(--fs-xs);
+  color: #7d8876;
+}
+.footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+.footer__social {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.footer__social a {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--on-dark-muted);
+  transition:
+    color var(--t) var(--ease),
+    background-color var(--t) var(--ease);
+}
+.footer__social svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ============================================================
+   Cart drawer
+   ============================================================ */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 49, 34, 0.38);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--t-slow) var(--ease),
+    visibility var(--t-slow) var(--ease);
+  z-index: 60;
+}
+.scrim.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  /* svw rather than vw so the panel never exceeds the visible width on a
+     desktop window with a classic scrollbar. */
+  width: min(420px, 100svw);
+  background: var(--paper);
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--t-slow) var(--ease);
+  box-shadow: var(--shadow-md);
+  /* The drawer is a fixed overlay: any scroll chaining out of it reaches the
+     locked page underneath and rubber-bands the whole panel on iOS. */
+  overscroll-behavior: contain;
+}
+.drawer.is-open {
+  transform: translateX(0);
+}
+.drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3);
+  /* Clears the status bar / notch when the drawer covers the full screen. */
+  padding-top: calc(var(--s3) + var(--sat));
+  padding-right: calc(var(--s3) + var(--sar));
+  border-bottom: 1px solid var(--line-soft);
+  flex-shrink: 0;
+}
+.drawer__head h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  font-size: var(--fs-h4);
+}
+.drawer__count {
+  background: var(--sand-deep);
+  color: var(--forest);
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--r-pill);
+}
+.drawer__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  text-align: center;
+  padding: var(--s4);
+}
+.drawer__empty-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--forest);
+}
+.drawer__empty-mark svg {
+  width: 26px;
+  height: 26px;
+}
+.drawer__ship {
+  padding: var(--s2) var(--s3);
+  background: var(--sand);
+  border-bottom: 1px solid var(--line-soft);
+  font-size: var(--fs-xs);
+}
+.drawer__ship p {
+  color: var(--forest);
+  margin-bottom: 0.5rem;
+}
+.ship-bar {
+  height: 4px;
+  background: var(--line);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+.ship-bar span {
+  display: block;
+  height: 100%;
+  background: var(--leaf);
+  border-radius: inherit;
+  transition: width var(--t-slow) var(--ease);
+}
+.drawer__items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--s3);
+  /* Stops a flick inside the list from chaining into the page behind. */
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.line {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: var(--s2);
+  padding: var(--s2) 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.line:last-child {
+  border-bottom: none;
+}
+.line__media {
+  width: 60px;
+}
+.line__media.media {
+  aspect-ratio: 1;
+}
+.line__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.4;
+}
+.line__name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--forest);
+}
+.line__variant {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.line__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--s1);
+  gap: var(--s1);
+}
+.line__foot .qty button {
+  width: 28px;
+  height: 28px;
+  font-size: 0.95rem;
+}
+.line__foot .qty span {
+  min-width: 22px;
+  font-size: var(--fs-xs);
+}
+.line__price {
+  font-weight: 500;
+  color: var(--forest-deep);
+  font-size: var(--fs-sm);
+}
+.line__remove {
+  color: var(--muted);
+  align-self: flex-start;
+  padding: 0.25rem;
+  transition: color var(--t) var(--ease);
+}
+.drawer__foot {
+  padding: var(--s3);
+  /* The checkout button lives here — the home indicator must not overlap it. */
+  padding-bottom: calc(var(--s3) + var(--sab));
+  padding-right: calc(var(--s3) + var(--sar));
+  border-top: 1px solid var(--line-soft);
+  background: var(--paper-raised);
+  flex-shrink: 0;
+}
+.drawer__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-sm);
+  margin-bottom: 0.375rem;
+}
+.drawer__row--muted {
+  color: var(--muted);
+}
+.drawer__row--total {
+  font-size: var(--fs-h4);
+  font-weight: 500;
+  color: var(--forest-deep);
+  margin: var(--s2) 0;
+  padding-top: var(--s2);
+  border-top: 1px solid var(--line);
+}
+.drawer__row--total span:last-child {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+
+/* ---------- hover states, mouse only ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .brand:hover .brand__mark {
+    /* The previous mark was a single leaf, so tilting it on hover was playful.
+       This one is a seal with type inside it, and rotated type just looks
+       broken, so it swells slightly instead. */
+    transform: scale(1.05);
+  }
+  .nav__link:hover {
+    color: var(--forest);
+  }
+  .nav__link:hover::after {
+    transform: scaleX(1);
+  }
+  .acct__btn:hover {
+    background: #23381a;
+  }
+  .acct__login:hover {
+    border-color: var(--forest);
+    background: rgba(44, 70, 48, 0.04);
+  }
+  .acct__item:hover {
+    background: rgba(44, 70, 48, 0.06);
+    color: var(--forest);
+  }
+  .acct__item:hover svg {
+    color: var(--leaf);
+  }
+  .acct__item--out:hover {
+    background: rgba(168, 70, 44, 0.07);
+    color: var(--danger);
+  }
+  .acct__item--out:hover svg {
+    color: var(--danger);
+  }
+  .footer__links a:hover {
+    color: var(--paper);
+  }
+  .footer__legal a:hover {
+    color: var(--paper);
+  }
+  .footer__social a:hover {
+    color: var(--paper);
+    background: rgba(243, 241, 233, 0.1);
+  }
+  .newsletter__form button:hover {
+    background: var(--ochre);
+  }
+  .line__remove:hover {
+    color: var(--danger);
+  }
+}
+
+/* ============================================================
+   Drawer navigation — tablets and phones (< 1025px)
+   ============================================================ */
+@media (max-width: 1024px) {
+  .header__burger {
+    display: grid;
+  }
+  .nav--desktop {
+    display: none;
+  }
+  /* Anchored to --nav-top, the header's real measured bottom edge, rather than
+     a hardcoded var(--header-h). The header is sticky *below* the announce
+     bar, so at the top of the page its bottom is the announce height + 64, not
+     64 — the old fixed offset tucked the panel underneath the header.
+     Header.jsx keeps the variable in sync on scroll and resize. */
+  .nav--mobile {
+    display: flex;
+    position: fixed;
+    top: var(--nav-top, var(--header-h));
+    right: 0;
+    left: 0;
+    flex-direction: column;
+    align-items: stretch;
+    background: var(--paper);
+    padding: var(--s2) calc(var(--s2) + var(--sar))
+      calc(var(--s3) + var(--sab)) calc(var(--s2) + var(--sal));
+    gap: 0.125rem;
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
+    max-height: calc(100dvh - var(--nav-top, var(--header-h)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    z-index: 51;
+    /* Was toggled with `display`, which cannot transition — the panel snapped
+       in. Transform + opacity animate on the compositor, and `visibility`
+       (not `display`) keeps it out of the a11y tree and off the tab order
+       between states while still allowing the fade. The links themselves are
+       already given tabIndex -1 and the nav aria-hidden by Header.jsx. */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      opacity var(--t) var(--ease),
+      transform var(--t-slow) var(--ease),
+      visibility var(--t-slow) var(--ease);
+  }
+  .nav--mobile.is-open {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .nav__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(30, 49, 34, 0.26);
+    opacity: 0;
+    visibility: hidden;
+    touch-action: none;
+    transition:
+      opacity var(--t-slow) var(--ease),
+      visibility var(--t-slow) var(--ease);
+  }
+  .nav__scrim.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
+  /* Left-aligned full-width rows at the 44px fingertip minimum. The active
+     item gets a rule on its leading edge rather than the desktop underline —
+     on a stacked list a baseline underline reads as a link, not a location. */
+  .nav--mobile .nav__link {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--r-sm);
+    font-size: var(--fs-body);
+  }
+  .nav--mobile .nav__link::after {
+    display: none;
+  }
+  .nav--mobile .nav__link.is-active {
+    color: var(--forest);
+  }
+  /* A straight marker on the leading edge. This was `border-left: 2px solid`,
+     which on a 12px-radius box doesn't draw a bar at all — it draws a thin
+     curl hugging the two left corners. */
+  .nav--mobile .nav__link.is-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 2px;
+    height: 1.25rem;
+    border-radius: 1px;
+    background: var(--clay);
+    transform: translateY(-50%);
+  }
+  /* Touch has no hover, so :active is the only press feedback there is. */
+  .nav--mobile .nav__link:active {
+    background: rgba(44, 70, 48, 0.07);
+  }
+  /* Search moves out of the header bar and into the panel, where it has room
+     to be full width. */
+  .header__actions .search {
+    display: none;
+  }
+  .nav__search {
+    display: flex;
+    margin-bottom: var(--s1);
+    max-width: none;
+  }
+  .nav__search input {
+    min-height: var(--tap);
+  }
+}
+
+/* ============================================================
+   Footer — accordion columns on phones
+   ============================================================ */
+@media (max-width: 900px) {
+  .footer__inner {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: var(--s4) var(--s3);
+  }
+  .footer__brand {
+    grid-column: 1 / -1;
+    max-width: 34rem;
+  }
+  .newsletter {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .footer {
+    margin-top: var(--s4);
+  }
+  .footer__inner {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-block: var(--s3) var(--s2);
+  }
+  .footer__brand {
+    max-width: none;
+    padding-bottom: var(--s2);
+  }
+  /* The paragraph, the trust line and the newsletter's sell line are the first
+     things to go: the columns below them are what people came to the footer
+     for, and the input's own placeholder says what the field is. */
+  .footer__tag,
+  .footer__badges,
+  .newsletter__sell {
+    display: none;
+  }
+  /* Collapsed rows. Footer.jsx renders these as <details> and only sets `open`
+     above 720px, so on a phone all three arrive shut — the single largest
+     saving in the whole footer. */
+  .footer__col {
+    border-top: 1px solid var(--on-dark-line);
+  }
+  .footer__col > summary {
+    cursor: pointer;
+    min-height: var(--tap);
+    display: flex;
+    align-items: center;
+  }
+  .footer__colhead {
+    width: 100%;
+  }
+  .footer__colhead svg {
+    display: block;
+  }
+  .footer__col[open] .footer__colhead svg {
+    transform: rotate(180deg);
+  }
+  .footer__links {
+    padding-bottom: var(--s2);
+  }
+  .footer__links a,
+  .footer__links p {
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .newsletter {
+    border-top: 1px solid var(--on-dark-line);
+    padding-top: var(--s2);
+  }
+  /* Three wrapped rows down here, so the row gap is doing the work the
+     horizontal gap does on desktop — 16px between them read as three separate
+     blocks rather than one bar. */
+  .footer__bar {
+    justify-content: center;
+    text-align: center;
+    gap: var(--s1) var(--s2);
+    padding-block: 0.75rem;
+    padding-bottom: calc(0.75rem + var(--sab));
+  }
+  .footer__legal {
+    justify-content: center;
+    order: 3;
+  }
+  .footer__social {
+    order: 1;
+    width: 100%;
+    justify-content: center;
+  }
+}

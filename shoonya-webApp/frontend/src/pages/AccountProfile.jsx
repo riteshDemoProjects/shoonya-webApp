@@ -162,7 +162,7 @@ export default function AccountProfile() {
       <form className="panel" onSubmit={saveDetails} noValidate>
         <h2>Personal details</h2>
         <Fields defs={DETAIL_FIELDS} values={details} errors={errors} onChange={setDetail} />
-        {alerts.details && <div className="alert">⚠️ {alerts.details}</div>}
+        {alerts.details && <div className="alert">{alerts.details}</div>}
         <div className="profile__actions">
           <button type="submit" className="btn btn--primary" disabled={busy === 'details'}>
             {busy === 'details' ? 'Saving…' : 'Save changes'}
@@ -176,7 +176,7 @@ export default function AccountProfile() {
           We'll use this to pre-fill your details at checkout.
         </p>
         <Fields defs={ADDRESS_FIELDS} values={address} errors={errors} onChange={setAddr} />
-        {alerts.address && <div className="alert">⚠️ {alerts.address}</div>}
+        {alerts.address && <div className="alert">{alerts.address}</div>}
         <div className="profile__actions">
           <button type="submit" className="btn btn--primary" disabled={busy === 'address'}>
             {busy === 'address' ? 'Saving…' : 'Save address'}
@@ -221,7 +221,7 @@ export default function AccountProfile() {
             {errors.confirm && <em className="field__err">{errors.confirm}</em>}
           </label>
         </div>
-        {alerts.password && <div className="alert">⚠️ {alerts.password}</div>}
+        {alerts.password && <div className="alert">{alerts.password}</div>}
         <div className="profile__actions">
           <button type="submit" className="btn btn--primary" disabled={busy === 'password'}>
             {busy === 'password' ? 'Updating…' : 'Update password'}

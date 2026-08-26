@@ -3,7 +3,7 @@ import { Link, useParams, useLocation } from 'react-router-dom'
 import { api } from '../api'
 import { formatINR, iconTheme } from '../data/catalogMeta'
 import ProductMedia from '../components/ProductMedia'
-import { CheckIcon, ArrowRight } from '../components/icons'
+import { ArrowRight, CheckIcon, SearchIcon, TruckIcon } from '../components/icons'
 
 const PAY_LABEL = { cod: 'Cash on Delivery', online: 'Online Payment (demo)' }
 
@@ -44,7 +44,9 @@ export default function OrderConfirmation() {
   if (err || !order) {
     return (
       <div className="empty-state empty-state--page">
-        <div className="empty-state__mark">🔍</div>
+        <div className="empty-state__mark">
+          <SearchIcon />
+        </div>
         <h3>Order not found</h3>
         <p className="muted">{err || `We couldn't find order ${orderNumber}.`}</p>
         <Link to="/shop" className="btn btn--primary">Continue shopping</Link>
@@ -57,14 +59,14 @@ export default function OrderConfirmation() {
       <div className="confirm__hero">
         <div className="confirm__check"><CheckIcon /></div>
         <span className="eyebrow">Order confirmed</span>
-        <h1>Thank you, {order.customer_name.split(' ')[0]}! 🌿</h1>
+        <h1>Thank you, {order.customer_name.split(' ')[0]}</h1>
         <p>
           Your order <strong>{order.order_number}</strong> is confirmed. A confirmation has been
           sent to <strong>{order.email}</strong>.
         </p>
         <div className="confirm__meta">
-          <span>📦 Status: <strong>{cap(order.status)}</strong></span>
-          <span>💳 {PAY_LABEL[order.payment_method] || order.payment_method}</span>
+          <span>Status: <strong>{cap(order.status)}</strong></span>
+          <span>{PAY_LABEL[order.payment_method] || order.payment_method}</span>
         </div>
       </div>
 
@@ -108,10 +110,12 @@ export default function OrderConfirmation() {
             <strong>{order.customer_name}</strong><br />
             {order.address}<br />
             {order.city}, {order.state} {order.pincode}<br />
-            📞 {order.phone}
+            Phone {order.phone}
           </address>
           <div className="confirm__eta">
-            <span className="confirm__eta-icon">🚚</span>
+            <span className="confirm__eta-icon">
+              <TruckIcon />
+            </span>
             <div>
               <strong>Estimated delivery</strong>
               <p>3–6 business days · Free tracking updates over email</p>

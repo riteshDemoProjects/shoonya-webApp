@@ -160,7 +160,7 @@ export default function Login() {
                 )}
               </label>
             </div>
-            {apiError && <div className="alert">⚠ {apiError}</div>}
+            {apiError && <div className="alert">{apiError}</div>}
             {resetMessage && <div className="notice">{resetMessage}</div>}
             <button
               type="submit"
@@ -200,7 +200,7 @@ export default function Login() {
               </label>
             </div>
 
-            {apiError && <div className="alert">⚠️ {apiError}</div>}
+            {apiError && <div className="alert">{apiError}</div>}
 
             <button
               type="submit"

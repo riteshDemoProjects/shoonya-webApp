@@ -1,0 +1,399 @@
+/* ============================================================
+   Home page
+   ============================================================ */
+
+/* The scroll cue and the footer's deep links both jump to sections on this
+   page; without this they land underneath the sticky header. */
+.home section[id] {
+  scroll-margin-top: calc(var(--header-h) + var(--s2));
+}
+
+/* ---------- hero ----------
+   Was a 92vh tinted panel with four floating emoji blobs. Now a photograph,
+   one angled scrim, and type that stops well short of the container width.
+   The height is 80dvh *minus the header*, so the fold lands just past the
+   headline instead of exactly on it — the strip below has to peek, or nobody
+   scrolls. dvh rather than vh so mobile Safari's collapsing toolbar doesn't
+   make it taller than the screen. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--on-dark);
+}
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--forest-deep);
+}
+.hero__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+}
+.hero__bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      92deg,
+      rgba(24, 40, 27, 0.88) 0%,
+      rgba(24, 40, 27, 0.66) 42%,
+      rgba(24, 40, 27, 0.2) 100%
+    ),
+    /* A second, vertical wash keeps the bottom edge dark enough for the
+       trust line and the scroll cue without darkening the whole photo. */
+    linear-gradient(
+      to top,
+      rgba(24, 40, 27, 0.55) 0%,
+      rgba(24, 40, 27, 0) 45%
+    );
+}
+.hero__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: clamp(30rem, calc(80dvh - var(--header-h)), 40rem);
+  padding-block: var(--s6) var(--s5);
+}
+.hero .eyebrow {
+  color: var(--ochre);
+  margin-bottom: var(--s2);
+}
+.hero h1 {
+  color: var(--paper);
+  /* ~20 characters a line at the top of the scale: three tight lines rather
+     than two very long ones. */
+  max-width: 19ch;
+  letter-spacing: -0.025em;
+}
+.hero h1 em {
+  color: var(--ochre);
+}
+.hero__sub {
+  margin-top: var(--s3);
+  max-width: 30rem;
+  font-size: var(--fs-lead);
+  line-height: 1.65;
+  color: rgba(243, 241, 233, 0.82);
+}
+.hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+  margin-top: var(--s4);
+}
+/* Three claims on one hairline-separated line, replacing the old stack of
+   pill-shaped "trust badges". */
+.hero__trust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.875rem;
+  margin-top: var(--s5);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(243, 241, 233, 0.72);
+}
+.hero__trust li {
+  display: flex;
+  align-items: center;
+  gap: 0.4375rem;
+}
+.hero__trust li:not(:last-child)::after {
+  content: "";
+  width: 1px;
+  height: 0.75rem;
+  margin-left: 0.4375rem;
+  background: rgba(243, 241, 233, 0.28);
+}
+.hero__trust svg {
+  width: 15px;
+  height: 15px;
+  color: var(--ochre);
+}
+
+/* A hairline that fills downward on a loop. Reads as "there is more" without
+   a bouncing chevron. */
+.hero__scroll {
+  position: absolute;
+  bottom: var(--s3);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(243, 241, 233, 0.6);
+}
+.hero__scroll span {
+  position: relative;
+  width: 1px;
+  height: 2.25rem;
+  background: rgba(243, 241, 233, 0.22);
+  overflow: hidden;
+}
+.hero__scroll span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--on-dark);
+  animation: scroll-cue 2.4s var(--ease) infinite;
+}
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* ---------- values strip ----------
+   Four claims across one hairlined band. No cards, no shadows: the point of
+   this row is to be read in three seconds and then scrolled past. */
+.values {
+  border-block: 1px solid var(--line-soft);
+  background: var(--paper);
+}
+.values__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  gap: var(--s3) var(--s4);
+}
+.value {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 0.875rem;
+  align-items: start;
+}
+.value svg {
+  width: 22px;
+  height: 22px;
+  color: var(--leaf);
+  margin-top: 0.1875rem;
+}
+.value h3 {
+  font-family: var(--sans);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--forest);
+  letter-spacing: 0;
+}
+.value p {
+  grid-column: 2;
+  margin-top: 0.1875rem;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- category cards ----------
+   Each card used to be a 190px gradient tile with a 56px emoji. Now: hairline
+   box, small line illustration in a tinted disc, name, one-line descriptor.
+   Nine of them fit in three rows of ~110px. */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: var(--s2);
+}
+.cat-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 0.875rem;
+  padding: 0.875rem 1rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  transition:
+    border-color var(--t) var(--ease),
+    box-shadow var(--t) var(--ease),
+    transform var(--t) var(--ease);
+}
+.cat-card__mark {
+  display: grid;
+  place-items: center;
+  /* Spans both rows so the disc centres against name *and* descriptor rather
+     than against the name alone. */
+  grid-row: 1 / span 2;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--forest);
+  transition: background-color var(--t) var(--ease);
+}
+.cat-card__mark svg {
+  width: 22px;
+  height: 22px;
+}
+.cat-card__name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: var(--lh-snug);
+  color: var(--forest);
+}
+.cat-card__tag {
+  grid-column: 2;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.4;
+}
+.cat-card__go {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+  color: var(--line);
+  transition:
+    color var(--t) var(--ease),
+    transform var(--t) var(--ease);
+}
+.cat-card__go svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- process ----------
+   Three columns, each a rule with a number under it. This is the one place on
+   the page where the layout is deliberately identical across all three items:
+   they are steps, and steps should look like each other. */
+.process__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: var(--s3) var(--s4);
+}
+.step {
+  border-top: 1px solid var(--line);
+  padding-top: var(--s2);
+}
+.step__n {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--clay);
+}
+.step h3 {
+  margin-top: 0.4375rem;
+  font-size: 1.25rem;
+}
+.step p {
+  margin-top: 0.5rem;
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* ---------- story preview ---------- */
+.story-preview__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3) var(--s5);
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line-soft);
+}
+.story-preview__stat strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.625rem;
+  font-weight: 600;
+  color: var(--forest);
+  line-height: 1.1;
+}
+.story-preview__stat span {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- hover states, mouse only ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .hero__scroll:hover {
+    color: var(--on-dark);
+  }
+  .cat-card:hover {
+    border-color: var(--line);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+  .cat-card:hover .cat-card__mark {
+    background: var(--sand-deep);
+  }
+  .cat-card:hover .cat-card__go {
+    color: var(--forest);
+    transform: translateX(3px);
+  }
+}
+
+/* ============================================================
+   Phones
+   ============================================================ */
+@media (max-width: 720px) {
+  /* Shorter, and the type gets the room instead of the photograph. */
+  .hero__inner {
+    min-height: clamp(26rem, calc(78dvh - var(--header-h)), 32rem);
+    padding-block: var(--s5) var(--s6);
+  }
+  .hero h1 {
+    max-width: 100%;
+  }
+  .hero__sub {
+    margin-top: var(--s2);
+    font-size: var(--fs-body);
+  }
+  .hero__cta {
+    margin-top: var(--s3);
+    width: 100%;
+  }
+  .hero__cta .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .hero__trust {
+    margin-top: var(--s4);
+  }
+  /* The dividers turn into visual noise once the row wraps to two lines. */
+  .hero__trust li:not(:last-child)::after {
+    display: none;
+  }
+  .hero__bg::after {
+    /* Nearly vertical on a portrait screen: an angled scrim tuned for a wide
+       viewport leaves the bottom-left corner of a phone screen too light. */
+    background: linear-gradient(
+      to top,
+      rgba(24, 40, 27, 0.92) 0%,
+      rgba(24, 40, 27, 0.66) 55%,
+      rgba(24, 40, 27, 0.42) 100%
+    );
+  }
+  .hero__scroll {
+    display: none;
+  }
+
+  .values__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s2);
+  }
+  .cat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .story-preview__stats {
+    gap: var(--s3);
+  }
+  .story-preview__stat {
+    flex: 1 1 40%;
+  }
+}

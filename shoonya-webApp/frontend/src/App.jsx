@@ -16,6 +16,8 @@ import Register from "./pages/Register";
 import Account from "./pages/Account";
 import AccountOrders from "./pages/AccountOrders";
 import AccountProfile from "./pages/AccountProfile";
+import Story from "./pages/Story";
+import { LeafIcon } from "./components/icons";
 
 // Scroll to top on navigation, or to the #hash target when present.
 function ScrollManager() {
@@ -58,7 +60,9 @@ function ScrollManager() {
 function NotFound() {
   return (
     <div className="empty-state empty-state--page">
-      <div className="empty-state__mark">🌾</div>
+      <div className="empty-state__mark">
+        <LeafIcon />
+      </div>
       <h3>Page not found</h3>
       <p className="muted">
         The page you're looking for has wandered off the farm.
@@ -80,6 +84,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/story" element={<Story />} />
           <Route path="/product/:slug" element={<ProductDetail />} />
 
           <Route path="/login" element={<Login />} />

@@ -2,19 +2,29 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import { useCart } from '../context/CartContext'
-import { formatINR, CATEGORY_META } from '../data/catalogMeta'
+import { formatINR } from '../data/catalogMeta'
 import ProductMedia from '../components/ProductMedia'
 import ProductCard from '../components/ProductCard'
+import SectionHead from '../components/SectionHead'
 import StarRating from '../components/StarRating'
-import { ArrowRight } from '../components/icons'
+import {
+  ArrowRight,
+  FlaskIcon,
+  LeafIcon,
+  PackageIcon,
+  PotIcon,
+  TruckIcon,
+} from '../components/icons'
 
 const BADGE_LABEL = { best: 'Bestseller', new: 'New', sale: 'Sale' }
 
+// The same four claims the home page makes, in the same four marks. They used
+// to be 🌿 🔬 🐄 🚚, which meant this row looked different on every OS.
 const FEATURES = [
-  ['🌿', 'No chemicals or preservatives'],
-  ['🔬', 'Third-party lab-tested'],
-  ['🐄', 'Traditional small-batch process'],
-  ['🚚', 'Free shipping over ₹999'],
+  { Icon: LeafIcon, text: 'No chemicals or preservatives' },
+  { Icon: FlaskIcon, text: 'Third-party lab-tested' },
+  { Icon: PotIcon, text: 'Traditional small-batch process' },
+  { Icon: TruckIcon, text: 'Free shipping over ₹999' },
 ]
 
 export default function ProductDetail() {
@@ -55,7 +65,9 @@ export default function ProductDetail() {
   if (err || !product) {
     return (
       <div className="empty-state empty-state--page">
-        <div className="empty-state__mark">🌾</div>
+        <div className="empty-state__mark">
+          <PackageIcon aria-hidden="true" />
+        </div>
         <h3>Product not found</h3>
         <p className="muted">{err || 'This item may no longer be available.'}</p>
         <Link to="/shop" className="btn btn--primary">Back to shop</Link>
@@ -65,7 +77,6 @@ export default function ProductDetail() {
 
   const variant = product.variants[vIdx]
   const discount = variant.mrp ? Math.round((1 - variant.price / variant.mrp) * 100) : 0
-  const meta = CATEGORY_META[product.category] || {}
 
   const handleAdd = (thenCheckout) => {
     add(product, variant, qty)
@@ -104,7 +115,7 @@ export default function ProductDetail() {
 
         <div className="pd__info">
           <div className="pd__tags">
-            <span className="pd__cat">{meta.emoji} {product.category}</span>
+            <span className="pd__cat">{product.category}</span>
             {product.badge && (
               <span className={`tag tag--${product.badge}`}>{BADGE_LABEL[product.badge]}</span>
             )}
@@ -146,30 +157,34 @@ export default function ProductDetail() {
               Add to cart · {formatINR(variant.price * qty)}
             </button>
           </div>
-          <button className="btn btn--amber btn--lg btn--block" onClick={() => handleAdd(true)}>
+          <button className="btn btn--accent btn--lg btn--block" onClick={() => handleAdd(true)}>
             Buy it now
           </button>
 
           <ul className="pd__features">
-            {FEATURES.map(([ic, t]) => (
-              <li key={t}><span>{ic}</span>{t}</li>
+            {FEATURES.map(({ Icon, text }) => (
+              <li key={text}>
+                <Icon aria-hidden="true" />
+                {text}
+              </li>
             ))}
           </ul>
         </div>
       </div>
 
       {related.length > 0 && (
-        <section className="section">
-          <div className="section__head">
-            <div>
-              <span className="eyebrow">You may also like</span>
-              <h2>More from {product.category}</h2>
-            </div>
-            <Link to={`/shop?category=${catKeyFromName(product.category)}`} className="link-arrow">
-              View all <ArrowRight />
-            </Link>
-          </div>
-          <div className="grid">
+        <section className="section" aria-labelledby="related-title">
+          <SectionHead
+            eyebrow="You may also like"
+            title={`More from ${product.category}`}
+            id="related-title"
+            action={
+              <Link to={`/shop?category=${catKeyFromName(product.category)}`} className="link-arrow">
+                View all <ArrowRight aria-hidden="true" />
+              </Link>
+            }
+          />
+          <div className="grid grid--rail">
             {related.map((p) => (
               <ProductCard product={p} key={p.id} />
             ))}

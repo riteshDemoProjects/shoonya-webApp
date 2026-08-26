@@ -1,0 +1,762 @@
+/* ============================================================
+   Account area — auth, dashboard, orders, profile, checkout, receipt
+   ============================================================ */
+
+/* ---------- auth ---------- */
+.auth {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--s5) var(--s6);
+}
+.auth__card {
+  width: 100%;
+  max-width: 27rem;
+}
+.auth__head {
+  text-align: center;
+  margin-bottom: var(--s3);
+}
+.auth__head h1 {
+  font-size: var(--fs-h3);
+  margin-bottom: 0.375rem;
+}
+.auth__head p {
+  font-size: var(--fs-sm);
+}
+.auth__card .btn--block {
+  margin-top: var(--s3);
+}
+.auth__alt {
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line-soft);
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.auth__link {
+  color: var(--forest);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: var(--line);
+  transition: text-decoration-color var(--t) var(--ease);
+}
+.auth__link--button {
+  display: block;
+  width: 100%;
+  margin-top: var(--s2);
+  font-size: var(--fs-sm);
+}
+
+/* ---------- account shell ---------- */
+.account {
+  padding-block: var(--s4) var(--s6);
+}
+.account__grid {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: var(--s3);
+  align-items: start;
+}
+.account__side {
+  position: sticky;
+  top: calc(var(--header-h) + var(--s2));
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.account__card {
+  padding: var(--s3);
+}
+/* Avatar + name/email, and the only thing in the card — so no dividing rule:
+   the card's own border already closes it off. */
+.account__who {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.account__avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--paper);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.account__avatar svg {
+  width: 22px;
+  height: 22px;
+}
+.account__who div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.4;
+}
+.account__who strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.account__who span {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.account__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.account__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  text-align: left;
+  color: var(--ink);
+  position: relative;
+  transition:
+    background-color var(--t) var(--ease),
+    color var(--t) var(--ease);
+}
+.account__tab svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.account__tab.is-active {
+  background: var(--sand);
+  color: var(--forest);
+  font-weight: 500;
+}
+/* Straight marker on the leading edge — a `border-left` here drew a curl around
+   the 12px corner radius rather than a bar. */
+.account__tab.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 1.125rem;
+  border-radius: 1px;
+  background: var(--clay);
+  transform: translateY(-50%);
+}
+.account__tab.is-active svg {
+  color: var(--forest);
+}
+.account__tab--out,
+.account__tab--out svg {
+  color: var(--danger);
+}
+.account__loading {
+  min-height: 40vh;
+  display: grid;
+  place-items: center;
+}
+
+/* ---------- orders ---------- */
+.orders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+}
+.orders__head {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding-bottom: var(--s2);
+  margin-bottom: var(--s2);
+  border-bottom: 1px solid var(--line-soft);
+}
+.orders__head h2 {
+  font-size: var(--fs-h3);
+}
+.orders__count {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.375rem;
+  border-radius: var(--r-pill);
+  background: var(--sand-deep);
+  color: var(--forest);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+.orders__none {
+  font-size: var(--fs-sm);
+}
+.orders__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.order {
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  transition: border-color var(--t) var(--ease);
+}
+.order.is-open {
+  border-color: var(--line);
+}
+.order__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2);
+  cursor: pointer;
+}
+.order__thumbs {
+  display: flex;
+  align-items: center;
+}
+.order__thumbs .media {
+  width: 42px;
+  border-radius: 8px;
+  /* Overlapped, so three items read as "an order" rather than three products,
+     and the row stays the same width no matter the item count. */
+  border: 2px solid var(--paper-raised);
+}
+.order__thumbs .media:not(:first-child) {
+  margin-left: -14px;
+}
+.order__more {
+  margin-left: 0.375rem;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.order__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.order__line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.order__number {
+  font-family: var(--serif);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--forest);
+  letter-spacing: 0.01em;
+}
+.order__status {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+}
+.order__status--pending {
+  background: rgba(200, 149, 47, 0.12);
+  border-color: rgba(200, 149, 47, 0.35);
+  color: #8a6414;
+}
+.order__status--done {
+  background: rgba(90, 122, 82, 0.12);
+  border-color: rgba(90, 122, 82, 0.32);
+  color: var(--forest);
+}
+.order__meta {
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+.order__right {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.order__total {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--forest-deep);
+  white-space: nowrap;
+}
+.order__toggle {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--muted);
+}
+.order__chev {
+  transition: transform var(--t) var(--ease);
+}
+.order.is-open .order__chev {
+  transform: rotate(180deg);
+}
+.order__body {
+  border-top: 1px solid var(--line-soft);
+  padding: var(--s2);
+  background: var(--paper);
+}
+.order__items {
+  display: flex;
+  flex-direction: column;
+}
+.order__foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+  gap: var(--s3);
+  margin-top: var(--s2);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--line-soft);
+}
+.order__ship h4,
+.confirm__ship h2 {
+  font-size: var(--fs-xs);
+  font-family: var(--sans);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+.order__ship address,
+.confirm__ship address {
+  font-style: normal;
+  font-size: var(--fs-sm);
+  line-height: 1.75;
+  color: var(--ink);
+}
+.order__totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.order__totals .btn {
+  margin-top: var(--s1);
+}
+
+/* ---------- profile ---------- */
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.profile .panel h2 {
+  font-size: var(--fs-h4);
+  font-family: var(--sans);
+  font-weight: 500;
+  margin-bottom: var(--s2);
+}
+.profile__hint {
+  font-size: var(--fs-sm);
+  margin-bottom: var(--s2);
+  margin-top: -0.5rem;
+}
+.profile__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line-soft);
+}
+
+/* ---------- checkout ---------- */
+.checkout {
+  padding-bottom: var(--s6);
+}
+.checkout__title {
+  font-size: var(--fs-h2);
+  margin-bottom: var(--s3);
+}
+.checkout__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: var(--s3);
+  align-items: start;
+}
+.checkout__as {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-bottom: var(--s2);
+}
+.checkout__save {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: var(--s2);
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  cursor: pointer;
+}
+.checkout__save input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--forest);
+}
+.checkout__secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  margin-top: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.checkout__secure svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+}
+.pay__opt {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--paper-raised);
+  cursor: pointer;
+  transition:
+    border-color var(--t) var(--ease),
+    background-color var(--t) var(--ease);
+}
+.pay__opt.is-active {
+  border-color: var(--forest);
+  background: rgba(44, 70, 48, 0.04);
+}
+.pay__opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+/* A ring that fills when checked. The native radio is hidden rather than
+   restyled so it looks the same in every browser. */
+.pay__mark {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transition: border-color var(--t) var(--ease);
+}
+.pay__mark::after {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--forest);
+  transform: scale(0);
+  transition: transform var(--t) var(--ease);
+}
+.pay__opt.is-active .pay__mark {
+  border-color: var(--forest);
+}
+.pay__opt.is-active .pay__mark::after {
+  transform: scale(1);
+}
+.pay__opt div {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.45;
+}
+.pay__opt strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.pay__opt small {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+/* ---------- order summary (checkout aside + receipt + order rows) ---------- */
+.summary {
+  position: sticky;
+  top: calc(var(--header-h) + var(--s2));
+}
+.summary h2 {
+  font-size: var(--fs-h4);
+  font-family: var(--sans);
+  font-weight: 500;
+  margin-bottom: var(--s2);
+}
+.summary__items,
+.confirm__items {
+  display: flex;
+  flex-direction: column;
+}
+.summary__items > li,
+.confirm__items > li,
+.order__items > li {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 0.625rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+.summary__items > li:last-child,
+.confirm__items > li:last-child,
+.order__items > li:last-child {
+  border-bottom: none;
+}
+.summary__media {
+  position: relative;
+  width: 48px;
+}
+.summary__media .media {
+  border-radius: 8px;
+}
+/* Quantity sits on the corner of the thumbnail instead of taking a column. */
+.summary__qty {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  background: var(--forest);
+  color: var(--paper);
+  font-size: 0.625rem;
+  font-weight: 500;
+  box-shadow: 0 0 0 2px var(--paper-raised);
+}
+.summary__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.4;
+}
+.summary__name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--forest);
+}
+.summary__variant {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.summary__price {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.summary__totals {
+  margin-top: var(--s2);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+}
+.summary__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s2);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.summary__row--total {
+  margin-top: 0.375rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--fs-h4);
+  font-weight: 500;
+  color: var(--forest-deep);
+}
+.summary__row--total span:last-child {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+.summary__free {
+  color: var(--leaf);
+  font-weight: 500;
+}
+
+/* ---------- receipt ---------- */
+.confirm {
+  padding-block: var(--s4) var(--s6);
+}
+.confirm__hero {
+  text-align: center;
+  max-width: 34rem;
+  margin: 0 auto var(--s4);
+}
+.confirm__check {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto var(--s2);
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--paper);
+}
+.confirm__check svg {
+  width: 26px;
+  height: 26px;
+}
+.confirm__hero h1 {
+  font-size: var(--fs-h2);
+  margin-bottom: 0.625rem;
+}
+.confirm__hero p {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.confirm__meta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem var(--s3);
+  margin-top: var(--s2);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.confirm__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: var(--s3);
+  align-items: start;
+}
+.confirm__ship address {
+  padding-bottom: var(--s2);
+}
+.confirm__eta {
+  display: flex;
+  gap: 0.75rem;
+  padding: var(--s2);
+  margin-bottom: var(--s2);
+  background: var(--sand);
+  border-radius: var(--r-sm);
+}
+.confirm__eta-icon {
+  color: var(--leaf);
+  flex-shrink: 0;
+}
+.confirm__eta-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.confirm__eta strong {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--forest);
+}
+.confirm__eta p {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 0.125rem;
+}
+.confirm__orders-link {
+  margin-top: var(--s1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .auth__link:hover {
+    text-decoration-color: var(--forest);
+  }
+  .account__tab:hover:not(.is-active) {
+    background: rgba(44, 70, 48, 0.05);
+    color: var(--forest);
+  }
+  .account__tab--out:hover {
+    background: rgba(168, 70, 44, 0.07);
+  }
+  .order__head:hover {
+    background: rgba(44, 70, 48, 0.02);
+  }
+  .order__toggle:hover {
+    color: var(--forest);
+  }
+  .pay__opt:hover:not(.is-active) {
+    border-color: var(--leaf);
+  }
+}
+
+@media (max-width: 900px) {
+  .checkout__grid,
+  .confirm__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Sticky is pointless once it's a single column — it would pin the summary
+     over the form it belongs under. */
+  .summary {
+    position: static;
+  }
+  .account__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .account__side {
+    position: static;
+  }
+  /* The sidebar becomes a horizontal tab strip above the content. */
+  .account__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  .account__tab {
+    width: auto;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-pill);
+  }
+  .account__tab.is-active {
+    border-color: var(--forest);
+  }
+  /* The pill's own border carries the active state here. */
+  .account__tab.is-active::before {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .auth {
+    padding-block: var(--s4) var(--s5);
+  }
+  .order__head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem var(--s1);
+  }
+  /* The overlapped thumbnails move to their own row rather than squeezing the
+     order number into two characters. */
+  .order__thumbs {
+    grid-row: 2;
+    grid-column: 1 / -1;
+  }
+  .order__foot {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s2);
+  }
+  .profile__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

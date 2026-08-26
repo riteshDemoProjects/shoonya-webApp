@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { lockScroll, unlockScroll } from "../scrollLock";
+import { initials } from "../initials";
 import {
   CartIcon,
   SearchIcon,
@@ -19,16 +20,8 @@ const NAV = [
   { to: "/shop?category=ghee", label: "Ghee" },
   { to: "/shop?category=honey", label: "Honey" },
   { to: "/shop?category=cold-pressed-oils", label: "Oils" },
-  { to: "/#story", label: "Our Story" },
+  { to: "/story", label: "Our Story" },
 ];
-
-const initials = (name = "") =>
-  name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() || "")
-    .join("") || "🌿";
 
 function AccountMenu({ open, setOpen }) {
   const { user, isLoggedIn, loading, logout } = useAuth();
@@ -59,7 +52,7 @@ function AccountMenu({ open, setOpen }) {
   if (!isLoggedIn) {
     return (
       <Link to="/login" className="acct__login" aria-label="Log in">
-        <UserIcon />
+        <UserIcon aria-hidden="true" />
         <span className="acct__login-text">Log in</span>
       </Link>
     );
@@ -80,7 +73,7 @@ function AccountMenu({ open, setOpen }) {
         aria-haspopup="menu"
         aria-label={`Account menu for ${user.full_name}`}
       >
-        {initials(user.full_name)}
+        {initials(user.full_name) || <UserIcon />}
       </button>
 
       {open && (
@@ -95,7 +88,7 @@ function AccountMenu({ open, setOpen }) {
             role="menuitem"
             onClick={() => setOpen(false)}
           >
-            <PackageIcon /> My orders
+            <PackageIcon aria-hidden="true" /> My orders
           </Link>
           <Link
             to="/account/profile"
@@ -103,14 +96,14 @@ function AccountMenu({ open, setOpen }) {
             role="menuitem"
             onClick={() => setOpen(false)}
           >
-            <UserIcon /> Profile
+            <UserIcon aria-hidden="true" /> Profile
           </Link>
           <button
             className="acct__item acct__item--out"
             role="menuitem"
             onClick={signOut}
           >
-            <LogoutIcon /> Log out
+            <LogoutIcon aria-hidden="true" /> Log out
           </button>
         </div>
       )}
@@ -137,9 +130,10 @@ export default function Header() {
 
   // --nav-top is the mobile menu panel's fixed anchor: the header's measured
   // bottom edge, *including* the announce bar above it. The header is sticky
-  // below the announce bar, so its bottom is ~157px at the top of the page but
-  // only var(--header-h) once the announce bar has scrolled away — measuring
-  // beats assuming, but it has to be re-measured as that gap closes.
+  // below the announce bar, so its bottom is announce-height + 64px at the top
+  // of the page but only var(--header-h) once the announce bar has scrolled
+  // away — measuring beats assuming, but it has to be re-measured as that gap
+  // closes.
   //
   // Scroll is in the listener list because the header's *position* changes
   // while its size does not, so ResizeObserver alone never fires for it — the
@@ -208,32 +202,55 @@ export default function Header() {
   return (
     <>
       <header className={`header ${scrolled ? "is-scrolled" : ""}`} ref={headerRef}>
+        {/* One row: burger (touch only), brand, nav, actions. The nav used to be
+            a second 41px band below this one; folding it in cost 45px of fixed
+            chrome on every page. */}
         <div className="header__inner">
           <button
-            className="header__burger"
+            className="header__burger icon-btn"
             aria-label="Menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
           >
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+            {menuOpen ? (
+              <CloseIcon aria-hidden="true" />
+            ) : (
+              <MenuIcon aria-hidden="true" />
+            )}
           </button>
 
           <Link to="/" className="brand" aria-label="Shoonya Farms home">
             {/* The badge contains the wordmark, so it needs no text beside it.
                 width/height are the rendered size, reserving the box before CSS
-                lands; styles.css owns the real dimensions. */}
+                lands; the stylesheet owns the real dimensions. */}
             <img
               src="/logo.svg"
               alt="Shoonya Farms"
               className="brand__mark"
-              width="44"
-              height="46"
+              width="40"
+              height="42"
             />
           </Link>
 
+          <nav className="nav nav--desktop">
+            {NAV.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                onClick={() => setMenuOpen(false)}
+                className={({ isActive }) =>
+                  `nav__link ${isActive ? "is-active" : ""}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+
           <div className="header__actions">
             <form className="search" onSubmit={submitSearch} role="search">
-              <SearchIcon className="search__icon" />
+              <SearchIcon className="search__icon" aria-hidden="true" />
               <input
                 type="search"
                 placeholder="Search staples…"
@@ -246,41 +263,27 @@ export default function Header() {
             <button
               className="cart-btn"
               onClick={openCart}
-              aria-label={`Cart, ${count} items`}
+              aria-label={`Cart, ${count} ${count === 1 ? "item" : "items"}`}
             >
-              <CartIcon />
+              <CartIcon aria-hidden="true" />
               {count > 0 && <span className="cart-btn__count">{count}</span>}
             </button>
           </div>
         </div>
-        <nav className="nav nav--desktop">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                `nav__link ${isActive ? "is-active" : ""}`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+
         <nav
           className={`nav nav--mobile ${menuOpen ? "is-open" : ""}`}
           aria-hidden={!menuOpen}
         >
-          {/* The header's search input is hidden under 720px — there is no room
+          {/* The header's search input is hidden under 1025px — there is no room
               for it beside the burger, brand and cart. This is the same form
-              given full width inside the panel, so phones keep search at all. */}
+              given full width inside the panel, so small screens keep search. */}
           <form
             className="search nav__search"
             onSubmit={submitSearch}
             role="search"
           >
-            <SearchIcon className="search__icon" />
+            <SearchIcon className="search__icon" aria-hidden="true" />
             <input
               type="search"
               placeholder="Search staples…"

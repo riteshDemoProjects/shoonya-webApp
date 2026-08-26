@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
 
+// Set in caps at 12px, which is small enough that an emoji would be the loudest
+// thing on the page. The spacing between claims comes from the track's
+// margin-right, not from a glyph.
 const MESSAGES = [
-  "🌿 100% Chemical-Free & Lab-Tested",
-  "🚚 Free shipping on orders over ₹999",
-  "🐄 Bilona & Hand-Milled, the old way",
-  "🍯 Raw, unprocessed & single-origin",
+  "100% Chemical-Free & Lab-Tested",
+  "Free shipping on orders over ₹999",
+  "Bilona & Hand-Milled, the old way",
+  "Raw, unprocessed & single-origin",
 ];
 
 export default function AnnounceBar() {
@@ -32,7 +35,7 @@ export default function AnnounceBar() {
 
   return (
     <div className="announce">
-      <div className="announce__notice" role="status">
+      <div className="announce__notice">
         This page is for demonstration purposes only and is not intended for
         business use.
       </div>

@@ -4,7 +4,7 @@ import { useCart, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '../context/CartC
 import { lockScroll, unlockScroll } from '../scrollLock'
 import { formatINR } from '../data/catalogMeta'
 import ProductMedia from './ProductMedia'
-import { CloseIcon, TrashIcon, ArrowRight } from './icons'
+import { ArrowRight, BasketIcon, CloseIcon, TrashIcon } from './icons'
 
 export default function CartDrawer() {
   const { items, subtotal, count, isOpen, closeCart, setQty, remove } = useCart()
@@ -52,7 +52,9 @@ export default function CartDrawer() {
 
         {items.length === 0 ? (
           <div className="drawer__empty">
-            <div className="drawer__empty-mark">🧺</div>
+            <div className="drawer__empty-mark">
+              <BasketIcon />
+            </div>
             <p>Your cart is feeling light.</p>
             <button
               className="btn btn--primary"
@@ -72,7 +74,7 @@ export default function CartDrawer() {
                   Add <strong>{formatINR(remaining)}</strong> more for <strong>free shipping</strong>
                 </p>
               ) : (
-                <p>🎉 You've unlocked <strong>free shipping!</strong></p>
+                <p>You've unlocked <strong>free shipping</strong></p>
               )}
               <div className="ship-bar">
                 <span style={{ width: `${pct}%` }} />

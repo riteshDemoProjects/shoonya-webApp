@@ -5,7 +5,7 @@ import { useCart, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from '../context/CartC
 import { useAuth } from '../context/AuthContext'
 import { formatINR } from '../data/catalogMeta'
 import ProductMedia from '../components/ProductMedia'
-import { ArrowRight } from '../components/icons'
+import { ArrowRight, BasketIcon, LockIcon } from '../components/icons'
 
 const FIELDS = [
   { name: 'customer_name', label: 'Full name', type: 'text', placeholder: 'Priya Sharma', span: 2 },
@@ -45,7 +45,9 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="empty-state empty-state--page">
-        <div className="empty-state__mark">🧺</div>
+        <div className="empty-state__mark">
+          <BasketIcon />
+        </div>
         <h3>Your cart is empty</h3>
         <p className="muted">Add a few staples before heading to checkout.</p>
         <Link to="/shop" className="btn btn--primary">Browse products</Link>
@@ -170,12 +172,14 @@ export default function Checkout() {
             </div>
           </section>
 
-          {apiError && <div className="alert">⚠️ {apiError}</div>}
+          {apiError && <div className="alert">{apiError}</div>}
 
           <button type="submit" className="btn btn--primary btn--lg btn--block" disabled={submitting}>
             {submitting ? 'Placing order…' : <>Place order · {formatINR(total)} <ArrowRight /></>}
           </button>
-          <p className="checkout__secure">🔒 This is a demo store — no real payment is processed.</p>
+          <p className="checkout__secure">
+            <LockIcon /> This is a demo store — no real payment is processed.
+          </p>
         </form>
 
         <aside className="summary">
@@ -209,7 +213,7 @@ export default function Checkout() {
               <span>{formatINR(total)}</span>
             </div>
           </div>
-          {shipping === 0 && <p className="summary__free">🎉 You qualified for free shipping!</p>}
+          {shipping === 0 && <p className="summary__free">Free shipping applied</p>}
         </aside>
       </div>
     </div>

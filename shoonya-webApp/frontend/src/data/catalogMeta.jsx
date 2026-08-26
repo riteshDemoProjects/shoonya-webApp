@@ -4,17 +4,23 @@
 export const formatINR = (n) => `₹${new Intl.NumberFormat('en-IN').format(n)}`
 
 // Soft gradient backgrounds behind each product illustration.
+//
+// These used to run from #f6e0a4 to #d7e1a6 to #f0cdd5 — nine unrelated hues at
+// nursery-pastel saturation, so a shop grid read as nine different brands. They
+// are now all tints of --sand (#f5f1e8), pushed a few degrees of hue apart:
+// enough that ghee and dal aren't the same tile, not enough to compete with the
+// illustration sitting on top.
 export const THEMES = {
-  ghee: 'linear-gradient(145deg,#fff6df,#f6e0a4)',
-  honey: 'linear-gradient(145deg,#fff1d6,#f4d089)',
-  oil: 'linear-gradient(145deg,#f2f4dd,#d7e1a6)',
-  essential: 'linear-gradient(145deg,#e6f2ea,#c3e2d0)',
-  dal: 'linear-gradient(145deg,#f6efe0,#e6d4b0)',
-  atta: 'linear-gradient(145deg,#f7f0e2,#ead9bd)',
-  sweet: 'linear-gradient(145deg,#f4e6d3,#e0c096)',
-  spice: 'linear-gradient(145deg,#fdeec6,#f2cf78)',
-  salt: 'linear-gradient(145deg,#fbeef0,#f0cdd5)',
-  combo: 'linear-gradient(145deg,#eef1e5,#d4dfbb)',
+  ghee: 'linear-gradient(145deg,#faf6ea,#efe6cd)',
+  honey: 'linear-gradient(145deg,#faf5e8,#efe3c6)',
+  oil: 'linear-gradient(145deg,#f5f5ea,#e4e6d1)',
+  essential: 'linear-gradient(145deg,#eff4ef,#dbe6dc)',
+  dal: 'linear-gradient(145deg,#f7f2e8,#e9dfca)',
+  atta: 'linear-gradient(145deg,#f8f4ea,#ebe1cc)',
+  sweet: 'linear-gradient(145deg,#f8f1e7,#ecdcc7)',
+  spice: 'linear-gradient(145deg,#fbf4e6,#f0e0bf)',
+  salt: 'linear-gradient(145deg,#f9f1ef,#eddcd8)',
+  combo: 'linear-gradient(145deg,#f2f4ec,#e0e5d5)',
 }
 
 // Order items only snapshot the icon key, not the theme — map it back so past
@@ -26,20 +32,24 @@ const ICON_THEME = {
 }
 export const iconTheme = (icon) => ICON_THEME[icon] || 'combo'
 
-// Category cards / filter metadata.
+// Category cards / filter metadata. `theme` picks both the gradient above and
+// the line icon in icons.jsx, so a category card and its products always share
+// a family. (There was an `emoji` field here too; the category cards and the
+// product page now use CategoryIcon instead, so nothing read it any more.)
 export const CATEGORY_META = {
-  Ghee: { emoji: '🧈', tag: 'A2, bilona-churned', theme: 'ghee' },
-  Honey: { emoji: '🍯', tag: 'Raw & single-origin', theme: 'honey' },
-  'Cold-Pressed Oils': { emoji: '🫒', tag: 'Wood-pressed', theme: 'oil' },
-  'Essential Oils': { emoji: '💧', tag: 'Pure aromatherapy', theme: 'essential' },
-  'Dals & Pulses': { emoji: '🫘', tag: 'Hand-milled', theme: 'dal' },
-  'Atta & Grains': { emoji: '🌾', tag: 'Stone-milled', theme: 'atta' },
-  Sweeteners: { emoji: '🍬', tag: 'Chemical-free', theme: 'sweet' },
-  'Spices & Salt': { emoji: '🧂', tag: 'Whole & ground', theme: 'spice' },
-  Combos: { emoji: '🎁', tag: 'Curated bundles', theme: 'combo' },
+  Ghee: { tag: 'A2, bilona-churned', theme: 'ghee' },
+  Honey: { tag: 'Raw & single-origin', theme: 'honey' },
+  'Cold-Pressed Oils': { tag: 'Wood-pressed', theme: 'oil' },
+  'Essential Oils': { tag: 'Pure aromatherapy', theme: 'essential' },
+  'Dals & Pulses': { tag: 'Hand-milled', theme: 'dal' },
+  'Atta & Grains': { tag: 'Stone-milled', theme: 'atta' },
+  Sweeteners: { tag: 'Chemical-free', theme: 'sweet' },
+  'Spices & Salt': { tag: 'Whole & ground', theme: 'spice' },
+  Combos: { tag: 'Curated bundles', theme: 'combo' },
 }
 
-const shadow = <ellipse cx="50" cy="88" rx="27" ry="4.5" fill="#1f3a10" opacity=".08" />
+// --forest-deep, not the old #1f3a10.
+const shadow = <ellipse cx="50" cy="88" rx="27" ry="4.5" fill="#1e3122" opacity=".08" />
 
 // Each illustration is a self-contained SVG (no <defs> ids to avoid collisions).
 export const ICONS = {

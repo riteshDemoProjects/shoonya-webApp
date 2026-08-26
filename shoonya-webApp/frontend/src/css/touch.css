@@ -1,0 +1,197 @@
+/* ============================================================
+   Touch and small-screen refinements
+   ------------------------------------------------------------
+   Loaded last so these win on source order without needing !important.
+
+   Note on hover: in the old stylesheet this file also had to *undo* dozens of
+   latched hover states, because hover rules were written unfenced and a touch
+   screen keeps :hover applied to the last element you touched. Every hover rule
+   in this rewrite is declared inside `(hover: hover) and (pointer: fine)` at the
+   point of definition, so there is nothing left to undo — what remains here is
+   fingertip sizing and press feedback, which is real touch design rather than
+   damage control.
+   ============================================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Touch has no hover, so :active is the only "I registered that" the
+     interface gets. Every tappable surface acknowledges the press. */
+  .btn:active,
+  .chip:active,
+  .size:active,
+  .variant:active,
+  .cat-card:active,
+  .card__medialink:active,
+  .pay__opt:active,
+  .account__tab:active,
+  .nav__link:active,
+  .footer__links a:active,
+  .footer__col > summary:active {
+    opacity: 0.72;
+  }
+  .card:active {
+    transform: scale(0.985);
+  }
+  /* A tap on a card shouldn't leave the 3px desktop lift stuck on it. */
+  .card,
+  .cat-card {
+    transition:
+      border-color var(--t) var(--ease),
+      transform var(--t-fast) var(--ease);
+  }
+}
+
+@media (max-width: 720px) {
+  /* 16px minimum on every focusable input. Below 16px, iOS Safari zooms the
+     whole viewport in on focus and does not zoom back out — the page is left
+     scrolled sideways with the header off-screen. This is the single most
+     important mobile rule in the stylesheet. */
+  .field input,
+  .field select,
+  .field textarea,
+  .search input,
+  .sort__field select,
+  .newsletter__form input {
+    font-size: 1rem;
+  }
+  /* The input is only as tall as its text, so the pill it sits in had ~11px of
+     dead band above and below where a tap did nothing. Matching the submit
+     button's height makes the whole pill interior the target. */
+  .newsletter__form input {
+    min-height: 34px;
+  }
+
+  /* Fingertip minimums. --tap is 44px, which is where both Apple's HIG and
+     Material land. Applied via min-height rather than padding so the visual
+     size of the control is unchanged where it already passed. */
+  .icon-btn,
+  .cart-btn,
+  .header__burger,
+  .acct__btn,
+  .order__toggle,
+  .add-btn {
+    min-width: var(--tap);
+    min-height: var(--tap);
+  }
+  .acct__item,
+  .account__tab,
+  .chip,
+  .btn {
+    min-height: var(--tap);
+  }
+  /* The stepper is the one control people mis-tap most: two 34px buttons
+     16px apart. Widened, not taller, so cart lines don't grow. */
+  .qty button {
+    min-width: 40px;
+  }
+  .line__foot .qty button {
+    min-width: 36px;
+    height: 32px;
+  }
+  /* The size pills inside a product card can't be 44px without doubling the
+     card height, so they get horizontal room instead. */
+  .size {
+    padding: 0.3125rem 0.6875rem;
+  }
+
+  /* Section rhythm tightens by roughly a third on a phone: the vertical scale
+     that reads as generous on a 1440px monitor reads as dead space on a 390px
+     screen, and it is the main reason the old pages scrolled forever. */
+  .section {
+    padding-block: var(--section-y-tight);
+  }
+  .section__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s1);
+    margin-bottom: var(--s3);
+  }
+  .section__head--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .panel {
+    padding: var(--s3) var(--s2);
+  }
+  .drawer {
+    /* Full width on a phone — a 420px panel on a 390px screen left a 30px
+       strip of page behind it that people kept tapping by accident. */
+    width: 100svw;
+  }
+  .drawer__head,
+  .drawer__foot,
+  .drawer__items {
+    padding-inline: var(--s2);
+  }
+  .empty-state {
+    padding: var(--s4) var(--s2);
+  }
+}
+
+/* ---------- small phones ----------
+   iPhone SE and the 360px Android floor. Everything above holds; this is only
+   about the places where two columns genuinely stop fitting. */
+@media (max-width: 480px) {
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .grid {
+    /* Two 15.5rem tracks can't fit, and auto-fill would drop to one very wide
+       card. An explicit 2-up with a tighter gap keeps the grid scannable. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s2) 0.75rem;
+  }
+  .card__body {
+    padding: 0.875rem 0.875rem 0.75rem;
+    gap: 0.375rem;
+  }
+  .card__name {
+    font-size: 0.9375rem;
+  }
+  .price__now {
+    font-size: 1rem;
+  }
+  /* At two-up the price and the add button no longer share a line. */
+  .card__foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .card__foot .add-btn {
+    align-self: flex-end;
+    margin-top: -1.75rem;
+  }
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s2);
+  }
+  .pd__thumb {
+    width: 54px;
+  }
+  .summary__items > li,
+  .confirm__items > li,
+  .order__items > li {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 0.625rem;
+  }
+  .summary__media {
+    width: 40px;
+  }
+}
+
+/* ---------- landscape phones ----------
+   A 390x844 phone turned sideways is 844x390: a hero sized as a fraction of
+   the viewport height has almost none to work with, so it's given a fixed
+   floor instead. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero__inner {
+    min-height: 22rem;
+    padding-block: var(--s4);
+  }
+  .hero__trust {
+    margin-top: var(--s3);
+  }
+  .story-hero {
+    padding-block: var(--s3);
+  }
+}

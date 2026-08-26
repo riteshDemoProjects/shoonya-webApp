@@ -4,7 +4,7 @@ import { api } from '../api'
 import { useCart } from '../context/CartContext'
 import { formatINR, iconTheme } from '../data/catalogMeta'
 import ProductMedia from '../components/ProductMedia'
-import { ChevronDown } from '../components/icons'
+import { AlertIcon, BasketIcon, ChevronDown } from '../components/icons'
 
 const PAY_LABEL = { cod: 'Cash on Delivery', online: 'Online Payment (demo)' }
 
@@ -38,7 +38,7 @@ function OrderCard({ order, defaultOpen = false, onReceived }) {
     setConfirming(true)
     try {
       const updated = await api.receiveOrder(order.order_number)
-      toast('Thanks — moved to your order history. 🌿')
+      toast('Thanks — moved to your order history.')
       // Re-renders this card into the history list, so don't clear `confirming`
       // afterwards: this instance is on its way out.
       onReceived(updated)
@@ -66,7 +66,7 @@ function OrderCard({ order, defaultOpen = false, onReceived }) {
           <div className="order__line">
             <strong className="order__number">{order.order_number}</strong>
             <span className={`order__status order__status--${pending ? 'pending' : 'done'}`}>
-              {pending ? '🚚 On the way' : '✅ Delivered'}
+              {pending ? 'On the way' : 'Delivered'}
             </span>
           </div>
           <span className="muted order__meta">
@@ -116,7 +116,7 @@ function OrderCard({ order, defaultOpen = false, onReceived }) {
                 <strong>{order.customer_name}</strong><br />
                 {order.address}<br />
                 {order.city}, {order.state} {order.pincode}<br />
-                📞 {order.phone}
+                Phone {order.phone}
               </address>
             </div>
 
@@ -143,7 +143,7 @@ function OrderCard({ order, defaultOpen = false, onReceived }) {
                   {confirming ? 'Saving…' : 'Mark as received'}
                 </button>
               )}
-              {error && <div className="alert">⚠️ {error}</div>}
+              {error && <div className="alert">{error}</div>}
               <Link to={`/order/${order.order_number}`} className="btn btn--ghost btn--block">
                 View full details
               </Link>
@@ -199,7 +199,9 @@ export default function AccountOrders() {
   if (err) {
     return (
       <div className="empty-state">
-        <div className="empty-state__mark">⚠️</div>
+        <div className="empty-state__mark">
+          <AlertIcon />
+        </div>
         <h3>Couldn't load your orders</h3>
         <p className="muted">{err}</p>
       </div>
@@ -209,7 +211,9 @@ export default function AccountOrders() {
   if (orders.length === 0) {
     return (
       <div className="empty-state">
-        <div className="empty-state__mark">🧺</div>
+        <div className="empty-state__mark">
+          <BasketIcon />
+        </div>
         <h3>No orders yet</h3>
         <p className="muted">
           When you place your first order it'll show up here, along with its status.
@@ -228,7 +232,7 @@ export default function AccountOrders() {
         </header>
         {pending.length === 0 ? (
           <p className="orders__none muted">
-            Nothing on its way right now — every order has been delivered. 🌿
+            Nothing on its way right now — every order has been delivered.
           </p>
         ) : (
           <div className="orders__list">

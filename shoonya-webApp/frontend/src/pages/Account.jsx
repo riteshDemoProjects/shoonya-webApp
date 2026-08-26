@@ -1,14 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { initials } from '../initials'
 import { LogoutIcon, PackageIcon, UserIcon } from '../components/icons'
-
-const initials = (name = '') =>
-  name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() || '')
-    .join('') || '🌿'
 
 export default function Account() {
   const { user, logout } = useAuth()
@@ -24,12 +17,14 @@ export default function Account() {
       <div className="account__grid">
         <aside className="account__side">
           <div className="account__card panel">
-            <div className="account__avatar" aria-hidden="true">
-              {initials(user?.full_name)}
-            </div>
             <div className="account__who">
-              <strong>{user?.full_name}</strong>
-              <span className="muted">{user?.email}</span>
+              <div className="account__avatar" aria-hidden="true">
+                {initials(user?.full_name) || <UserIcon />}
+              </div>
+              <div>
+                <strong>{user?.full_name}</strong>
+                <span>{user?.email}</span>
+              </div>
             </div>
           </div>
 

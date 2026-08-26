@@ -1,0 +1,125 @@
+/* ============================================================
+   Story page
+   ------------------------------------------------------------
+   The page is now assembled almost entirely from the shared blocks in
+   blocks.css — .split for the two prose bands, .media-card for the team and
+   craft grids, .timeline for the methodology, .stats for the impact figures,
+   .band for the closing CTA. What's left here is the hero and the handful of
+   things that are genuinely specific to this page.
+   ============================================================ */
+
+/* Deep links (/story#methodology) have to clear the sticky header. */
+.story-page section[id] {
+  scroll-margin-top: calc(var(--header-h) + var(--s2));
+}
+
+/* ---------- hero ----------
+   Replaces a 540px full-bleed dark-green panel with a centred headline. That
+   panel was the single heaviest thing on the site: a saturated green wall the
+   moment the page opened, then another dark band at the footer, with warm white
+   in between. This is sand, asymmetric, and ~35% shorter — the photograph does
+   the atmospheric work and the green is saved for the impact band. */
+.story-hero {
+  background: var(--sand);
+  border-bottom: 1px solid var(--line);
+  padding-block: clamp(2rem, 3.4vw, 3rem);
+}
+.story-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+}
+.story-hero__body {
+  /* Nudged up off the optical centre — with a large image alongside, a
+     mathematically centred text column reads as sitting slightly low. */
+  padding-bottom: var(--s1);
+}
+.story-hero h1 {
+  max-width: 16ch;
+}
+.story-hero__sub {
+  margin-top: var(--s2);
+  max-width: 26rem;
+}
+/* Section jump links. Eight sections is a lot to scroll blind, and this is
+   cheaper than a sticky sub-nav. */
+.story-hero__jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1.25rem;
+  margin-top: var(--s3);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.story-hero__jump a {
+  color: var(--muted);
+  transition: color var(--t) var(--ease);
+}
+/* The frame is capped by height, not by ratio: a portrait crop this large is
+   what made the old hero tall. A wide crop at ~248px holds the same amount of
+   landscape and costs half the vertical space. */
+.story-hero__media .frame {
+  aspect-ratio: 4 / 3;
+  max-height: clamp(12rem, 24vw, 15.5rem);
+}
+
+/* ---------- pull quote ----------
+   One in the temple section. Fraunces italic, a clay rule on the leading edge,
+   no quotation-mark ornament. */
+.pullquote {
+  margin-top: var(--s3);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--clay);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--fs-lead);
+  line-height: 1.6;
+  color: var(--forest);
+}
+.pullquote cite {
+  display: block;
+  margin-top: var(--s1);
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .story-hero__jump a:hover {
+    color: var(--forest);
+  }
+}
+
+@media (max-width: 720px) {
+  .story-hero {
+    padding-block: var(--s3) var(--s4);
+  }
+  .story-hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s3);
+  }
+  /* Headline first on a phone: the image below it is context, not the hook. */
+  .story-hero__media {
+    order: 2;
+  }
+  .story-hero h1 {
+    max-width: 100%;
+  }
+  .story-hero__jump {
+    gap: 0.375rem 1rem;
+  }
+  .story-hero__media .frame {
+    aspect-ratio: 16 / 10;
+    max-height: 11rem;
+  }
+  .pullquote {
+    padding-left: var(--s2);
+  }
+}

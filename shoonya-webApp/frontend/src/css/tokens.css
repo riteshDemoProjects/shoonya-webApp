@@ -1,0 +1,122 @@
+/* ============================================================
+   Design tokens — the single source of truth for the whole UI.
+   Nothing below this file should introduce a raw colour, a raw
+   font size, or a spacing value that isn't on the 8px scale.
+   ============================================================ */
+
+:root {
+  /* ---- Palette -------------------------------------------------
+     Warm white page, sand for secondary bands, a soft earthy green
+     for structure, terracotta as the single accent. Ochre is kept
+     for stars and discounts only — it earns its loudness there. */
+  --paper: #fcfbf7; /* page background */
+  --paper-raised: #ffffff; /* cards sitting on sand */
+  --sand: #f5f1e8; /* secondary section background */
+  --sand-deep: #ede7d9; /* tertiary fills, media placeholders */
+
+  --forest: #2c4630; /* headings, primary actions */
+  --forest-deep: #1e3122; /* dark bands, footer */
+  --leaf: #5a7a52; /* eyebrows, meta, links */
+
+  --clay: #b5583c; /* accent — one per view, never decorative */
+  --clay-deep: #9c4831;
+
+  --ochre: #c8952f; /* stars, discount badges */
+
+  --ink: #22271f; /* body copy */
+  --muted: #63695e; /* secondary copy — 5.2:1 on --paper */
+  --line: #e2dccc; /* hairline */
+  --line-soft: #ede8da; /* hairline, one step quieter */
+
+  --danger: #a8462c;
+  --star: var(--ochre);
+
+  /* On dark bands. Kept as tokens so a dark section never hardcodes
+     an off-white and drifts from the others. */
+  --on-dark: #f3f1e9;
+  --on-dark-muted: #b9c2b2;
+  --on-dark-line: rgba(243, 241, 233, 0.16);
+
+  /* ---- Type ----------------------------------------------------
+     Three weights only: 400 body, 500 emphasis/UI, 600 headings.
+     Anything heavier reads as shouting at these sizes. */
+  --sans: "Poppins", system-ui, -apple-system, sans-serif;
+  --serif: "Fraunces", "Georgia", serif;
+
+  --fs-h1: clamp(2.25rem, 1.35rem + 3.4vw, 3.75rem); /* 36 → 60 */
+  --fs-h2: clamp(1.75rem, 1.28rem + 1.8vw, 2.75rem); /* 28 → 44 */
+  --fs-h3: clamp(1.375rem, 1.16rem + 0.82vw, 1.875rem); /* 22 → 30 */
+  --fs-h4: 1.125rem; /* 18 */
+  --fs-lead: clamp(1rem, 0.96rem + 0.18vw, 1.125rem); /* 16 → 18 */
+  --fs-body: 1rem;
+  --fs-sm: 0.875rem; /* 14 */
+  --fs-xs: 0.75rem; /* 12 */
+
+  --lh-tight: 1.1; /* display */
+  --lh-snug: 1.35; /* h3/h4, card names */
+  --lh-body: 1.7; /* long-form paragraphs */
+
+  /* Line lengths. Editorial copy is never allowed to run the full
+     container width — 60-75 characters is the readable range. */
+  --measure: 34rem;
+  --measure-wide: 42rem;
+
+  /* ---- Space — 8px scale, no exceptions ------------------------ */
+  --s1: 0.5rem; /* 8  */
+  --s2: 1rem; /* 16 */
+  --s3: 1.5rem; /* 24 */
+  --s4: 2rem; /* 32 */
+  --s5: 3rem; /* 48 */
+  --s6: 4rem; /* 64 */
+  --s7: 6rem; /* 96 */
+
+  /* Vertical section rhythm. Two steps, not one per section: a band
+     of cards needs more air than a band of type, and nothing needs
+     the 88px the old single value handed out everywhere. */
+  --section-y: clamp(3rem, 4.4vw, 4.5rem); /* 48 → 72 */
+  --section-y-tight: clamp(2.5rem, 3.2vw, 3.5rem); /* 40 → 56 */
+
+  /* ---- Shape --------------------------------------------------- */
+  --r-sm: 12px;
+  --r-card: 20px;
+  --r-img: 24px;
+  --r-pill: 999px;
+
+  /* Depth comes from hairlines; shadows only lift a surface off the
+     page by a hair. Nothing here casts more than 28px of blur. */
+  --shadow-xs: 0 1px 2px rgba(34, 39, 31, 0.04);
+  --shadow-sm: 0 2px 8px rgba(34, 39, 31, 0.05);
+  --shadow-md: 0 12px 28px rgba(34, 39, 31, 0.07);
+
+  /* ---- Layout -------------------------------------------------- */
+  --maxw: 1240px;
+  --header-h: 64px;
+
+  /* Horizontal page gutter. One knob for every full-width section,
+     and it folds the left/right insets in for landscape-notch
+     orientation. */
+  --gutter: clamp(1.25rem, 4vw, 2rem);
+
+  /* Safe-area insets, aliased once so components don't repeat the
+     env() + fallback dance. `env()` with a 0px fallback is 0 on every
+     non-notched device and in every desktop browser, so these are
+     free to add anywhere. */
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+
+  /* Smallest comfortable fingertip target (Apple HIG / Material both
+     land here). Used instead of scattering magic 44s through the
+     mobile queries. */
+  --tap: 44px;
+
+  /* ---- Motion --------------------------------------------------
+     250–350ms is the band where a transition reads as considered
+     rather than either instant or sluggish. --t-fast is for press
+     feedback only, which has to feel immediate. */
+  --ease: cubic-bezier(0.32, 0.08, 0.24, 1);
+  --t-fast: 180ms;
+  --t: 260ms;
+  --t-slow: 340ms;
+}

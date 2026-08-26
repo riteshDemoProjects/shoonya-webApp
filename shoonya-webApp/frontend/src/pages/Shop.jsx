@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { api } from '../api'
 import ProductCard from '../components/ProductCard'
-import { ChevronDown } from '../components/icons'
+import { AlertIcon, ChevronDown, CloseIcon, SearchIcon } from '../components/icons'
 
 const SORTS = [
   { key: 'featured', label: 'Featured' },
@@ -93,24 +93,30 @@ export default function Shop() {
 
       {search && (
         <button className="clear-search" onClick={() => patch({ search: '' })}>
-          ✕ Clear search
+          <CloseIcon /> Clear search
         </button>
       )}
 
       {loading ? (
-        <div className="grid">
+        <div className="grid" aria-hidden="true">
           {Array.from({ length: 8 }).map((_, i) => (
             <div className="card card--skeleton" key={i} />
           ))}
         </div>
       ) : err ? (
         <div className="empty-state">
-          <p>⚠️ {err}</p>
-          <p className="muted">Make sure the backend is running on port 8000.</p>
+          <div className="empty-state__mark">
+            <AlertIcon />
+          </div>
+          <h3>Couldn't load the catalogue</h3>
+          <p className="muted">{err}</p>
+          <p className="muted">Make sure the backend is running on port 8001.</p>
         </div>
       ) : products.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state__mark">🔍</div>
+          <div className="empty-state__mark">
+            <SearchIcon />
+          </div>
           <h3>No products found</h3>
           <p className="muted">Try a different category or search term.</p>
           <button className="btn btn--primary" onClick={() => setParams({}, { replace: true })}>

@@ -139,7 +139,7 @@ export default function Register() {
             </label>
           </div>
 
-          {apiError && <div className="alert">⚠️ {apiError}</div>}
+          {apiError && <div className="alert">{apiError}</div>}
 
           <button
             type="submit"

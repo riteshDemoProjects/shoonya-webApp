@@ -1,0 +1,375 @@
+/* ============================================================
+   Reset, element defaults, typography, layout primitives
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Deliberately no `scrollbar-gutter: stable` here. It would smooth over the
+     15px sideways nudge when an overlay locks body scroll on a desktop window,
+     but it measurably reflows the desktop page and that view is the known-good
+     reference. It buys nothing on real phones either, where scrollbars are
+     overlays and locking reclaims no width. */
+}
+
+body {
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Backstop only — every known overflow is fixed at its source. Two reasons it
+     lives here and not on <html>: `clip` rather than `hidden` because `hidden`
+     would make this a scroll container and break the sticky header, and on
+     <body> rather than <html> because overflow only propagates to the viewport
+     from <body> while <html> is still `visible` — setting anything on <html>
+     would cut off that propagation and disable the scroll lock. */
+  overflow-x: clip;
+  /* Kills the horizontal rubber-band on iOS/Android without touching the
+     vertical one. `none` on both axes would break pull-to-refresh, which is a
+     gesture people expect on a storefront; only the sideways bounce (which
+     reveals a blank gutter beside a full-bleed section) is unwanted. */
+  overscroll-behavior-x: none;
+}
+
+/* Never let a mistimed long-press or double-tap select UI chrome or zoom the
+   page. Applied to controls only — body copy stays selectable. */
+button,
+a,
+[role="button"],
+summary,
+label {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+/* `manipulation` opts out of the legacy 300ms double-tap-to-zoom delay, so
+   taps register immediately, while leaving pinch-zoom fully intact. */
+button,
+a,
+input[type="submit"],
+input[type="button"],
+[role="button"] {
+  touch-action: manipulation;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+::selection {
+  background: rgba(181, 88, 60, 0.18);
+  color: var(--forest-deep);
+}
+
+/* One focus ring for the entire site. :focus-visible rather than :focus so it
+   never appears on a mouse click, only on keyboard and other non-pointer
+   input — which is the only time it's information rather than noise. */
+:focus-visible {
+  outline: 2px solid var(--leaf);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- headings ---------- */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--forest);
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+h1 {
+  font-size: var(--fs-h1);
+  line-height: var(--lh-tight);
+}
+h2 {
+  font-size: var(--fs-h2);
+  line-height: 1.14;
+}
+h3 {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.01em;
+}
+h4 {
+  font-size: var(--fs-h4);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.005em;
+}
+/* Italic Fraunces is the one flourish the display type gets. It marks the
+   emphatic clause in a headline and nothing else. */
+h1 em,
+h2 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--clay);
+}
+
+/* ---------- text utilities ---------- */
+.muted {
+  color: var(--muted);
+}
+.lead {
+  font-size: var(--fs-lead);
+  color: var(--muted);
+  max-width: var(--measure);
+}
+.measure {
+  max-width: var(--measure);
+}
+.measure-wide {
+  max-width: var(--measure-wide);
+}
+
+/* Small-caps kicker above a heading. Letterspaced because uppercase at 12px
+   is unreadable set solid. */
+.eyebrow {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--leaf);
+  margin-bottom: var(--s2);
+}
+
+/* Long-form editorial copy. The generous line-height and the measure are the
+   whole difference between "web page" and "something you'd read". */
+.prose > p {
+  color: var(--ink);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-body);
+  max-width: var(--measure-wide);
+}
+.prose > p + p {
+  margin-top: var(--s2);
+}
+.prose strong {
+  font-weight: 500;
+  color: var(--forest);
+}
+.prose em {
+  font-style: italic;
+  color: var(--clay);
+}
+
+/* Text link with an arrow that steps forward on hover. The animation is on
+   `gap`, so nothing reflows around it. */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--forest);
+  white-space: nowrap;
+  transition: gap var(--t) var(--ease);
+}
+.link-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Underline that draws in from the left. A pseudo-element rather than
+   text-decoration so it can be animated and sits on the baseline gap. */
+.link-line {
+  position: relative;
+  color: var(--forest);
+  font-weight: 500;
+}
+.link-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t) var(--ease);
+}
+
+/* ---------- layout primitives ---------- */
+.main {
+  /* dvh, not vh: on mobile Safari `vh` is locked to the *expanded* browser-UI
+     height, so a short page reserved more space than the visible viewport and
+     pushed the footer below the fold. */
+  min-height: 60dvh;
+}
+
+/* The container. Every full-bleed band puts one of these inside itself rather
+   than setting its own max-width, so there is exactly one place that decides
+   how wide the site is. */
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: calc(var(--gutter) + var(--sal))
+    calc(var(--gutter) + var(--sar));
+}
+
+.section {
+  padding-block: var(--section-y);
+}
+.section--tight {
+  padding-block: var(--section-y-tight);
+}
+.section--flush-top {
+  padding-top: 0;
+}
+.section--sand {
+  background: var(--sand);
+}
+.section--dark {
+  background: var(--forest-deep);
+  color: var(--on-dark);
+}
+.section--dark h2,
+.section--dark h3 {
+  color: var(--paper);
+}
+.section--dark .eyebrow {
+  color: var(--ochre);
+}
+.section--dark .muted,
+/* The standfirst under a section heading is --muted, which is a *dark* grey and
+   would all but vanish on the forest ground. */
+.section--dark .section__head p {
+  color: var(--on-dark-muted);
+}
+/* A hairline instead of a background change. Used where two same-coloured
+   bands meet and the eye still needs to know they're different sections. */
+.section--ruled {
+  border-top: 1px solid var(--line-soft);
+}
+
+/* Section header: kicker + heading on the left, an optional "view all" on the
+   right, dropping to a stack on narrow screens. */
+.section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+.section__head h2 {
+  max-width: 24ch;
+}
+.section__head p {
+  margin-top: var(--s1);
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  max-width: var(--measure);
+}
+.section__head--center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.section__head--center h2,
+.section__head--center p {
+  max-width: var(--measure-wide);
+}
+
+/* ---------- scroll reveal ----------
+   Reveal.jsx adds .is-in when the element enters the viewport. The transition
+   is deliberately only opacity + translate: both run on the compositor, so a
+   page with two dozen of these still scrolls at 60fps. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--t-slow) var(--ease),
+    transform var(--t-slow) var(--ease);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+/* Staggering is set inline as --reveal-delay by the caller so a grid of cards
+   arrives as a sequence rather than a single block. */
+.reveal[style*="--reveal-delay"] {
+  transition-delay: var(--reveal-delay);
+}
+
+/* ---------- hover fencing ----------
+   Every hover affordance in this stylesheet lives inside one of these blocks
+   or is re-neutralised in touch.css. A touch screen leaves :hover latched on
+   the last-touched element until you tap elsewhere, so an unfenced hover state
+   sticks for the rest of the visit. */
+@media (hover: hover) and (pointer: fine) {
+  .link-arrow:hover {
+    gap: var(--s2);
+    color: var(--leaf);
+  }
+  .link-line:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* The marquee is content, not decoration — freezing it mid-track would leave
+     a sentence cut in half. It keeps running; everything else stops. */
+  .announce__track {
+    animation-duration: 28s !important;
+    animation-iteration-count: infinite !important;
+  }
+  /* Revealed content must be visible, not stuck at opacity 0, if the observer
+     never gets to run its transition. */
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

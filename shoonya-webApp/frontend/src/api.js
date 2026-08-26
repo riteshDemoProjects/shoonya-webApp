@@ -75,7 +75,7 @@ async function request(path, options = {}) {
     res = await fetch(`${BASE}${path}`, { ...options, headers });
   } catch {
     throw new ApiError(
-      "Cannot reach the server. Is the backend running on port 8000?",
+      "Cannot reach the server. Is the backend running on port 8001?",
       0,
     );
   }

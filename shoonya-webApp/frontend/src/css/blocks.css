@@ -1,0 +1,481 @@
+/* ============================================================
+   Composite blocks shared by more than one page
+   ------------------------------------------------------------
+   The old stylesheet had four near-identical two-column "image beside text"
+   grids (story beginning, story temple, story impact, home story-preview) and
+   two byte-identical card rule sets (team, craft). Those collapse into .split
+   and .media-card here, so a change to the editorial rhythm happens once.
+   ============================================================ */
+
+/* ---------- product grid ----------
+   auto-fill with a 15.5rem floor: four up at 1240px, three on a tablet, two on
+   a large phone, and no breakpoint needed to get there. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: var(--s3);
+}
+.grid--2 {
+  grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
+}
+.grid--3 {
+  grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr));
+}
+.grid--4 {
+  grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
+}
+
+/* ---------- product card ----------
+   The media is edge-to-edge at the top of the card — the card's own radius and
+   `overflow: hidden` do the clipping, so there's no nested rounded rectangle
+   inside a rounded rectangle. 4:5 portrait, because a jar or a bottle is taller
+   than it is wide and a square left dead air above and below it. */
+.card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  transition:
+    border-color var(--t) var(--ease),
+    box-shadow var(--t) var(--ease),
+    transform var(--t) var(--ease);
+}
+.card__badges {
+  position: absolute;
+  top: var(--s1);
+  left: var(--s1);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+.card__medialink {
+  display: block;
+}
+.card .media {
+  aspect-ratio: 4 / 5;
+  border-radius: 0;
+}
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+  padding: var(--s2) var(--s2) 0.875rem;
+  flex: 1;
+}
+.card__cat {
+  font-size: var(--fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--leaf);
+  line-height: 1.2;
+}
+.card__name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: var(--lh-snug);
+  color: var(--forest);
+  letter-spacing: -0.01em;
+  /* Two lines maximum, so every card in a row has the same body height and the
+     price rails line up across the grid. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--t) var(--ease);
+}
+.card__sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.125rem;
+}
+.size {
+  padding: 0.1875rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--muted);
+  line-height: 1.5;
+  transition:
+    border-color var(--t) var(--ease),
+    color var(--t) var(--ease),
+    background-color var(--t) var(--ease);
+}
+.size.is-active {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--paper);
+}
+/* Pushed to the bottom of the body so the price sits on the card's baseline
+   regardless of how many lines the name took. */
+.card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s1);
+  margin-top: auto;
+  padding-top: 0.6875rem;
+}
+/* Was a 42px circle that scaled 1.08 and rotated 90deg on hover — a lot of
+   motion for "add one jar". Now it's a quiet outline pill that fills in. */
+.add-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--forest);
+  transition:
+    background-color var(--t) var(--ease),
+    border-color var(--t) var(--ease),
+    color var(--t) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.add-btn svg {
+  width: 17px;
+  height: 17px;
+}
+.add-btn:active {
+  transform: scale(0.92);
+}
+.add-btn.is-added {
+  background: var(--leaf);
+  border-color: var(--leaf);
+  color: #fff;
+}
+
+.card--skeleton {
+  min-height: 22rem;
+  border-style: dashed;
+  background: linear-gradient(
+    100deg,
+    var(--sand) 30%,
+    var(--sand-deep) 50%,
+    var(--sand) 70%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -120% 0;
+  }
+}
+
+/* ---------- editorial split ----------
+   One primitive for every "image beside prose" band on the site. Asymmetric by
+   default: a 1.1:1 ratio reads as composed, an exact 1:1 reads as a wireframe. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 4.5vw, 4rem);
+  align-items: center;
+}
+.split--media-lead {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+/* Media stays first in the DOM — the reading order is picture, then story —
+   and only its visual column flips. Reset at the mobile breakpoint below. */
+.split--reverse .split__media {
+  order: 2;
+}
+.split--top {
+  align-items: start;
+}
+.split__body > .btn,
+.split__body > .link-arrow {
+  margin-top: var(--s3);
+}
+.split__body h2 + .prose,
+.split__body h2 + .lead {
+  margin-top: var(--s2);
+}
+
+/* An offset hairline behind the image: two flat planes, slightly out of
+   register. Cheaper than a shadow and it reads as deliberate composition. */
+.split__media--offset {
+  position: relative;
+}
+.split__media--offset::before {
+  content: "";
+  position: absolute;
+  inset: var(--s3) calc(-1 * var(--s3)) calc(-1 * var(--s3)) var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-img);
+  z-index: -1;
+}
+
+/* ---------- media card ----------
+   Image + type, no box. Used for team members and craft statements, which used
+   to be two identical bordered cards with 24px of padding each. */
+.media-card {
+  display: flex;
+  flex-direction: column;
+}
+.media-card__body {
+  padding-top: var(--s2);
+}
+.media-card h3 {
+  font-size: 1.125rem;
+  line-height: var(--lh-snug);
+}
+.media-card__meta {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--leaf);
+}
+.media-card p {
+  margin-top: 0.625rem;
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* ---------- numbered timeline ----------
+   Type and hairlines only. The old version drew a 64px emoji circle per step
+   plus a connecting rail; five of those ran to well over 700px. */
+.timeline {
+  border-top: 1px solid var(--line);
+}
+.timeline__row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 0.9fr) minmax(0, 1.3fr);
+  gap: var(--s3);
+  align-items: baseline;
+  padding-block: var(--s3);
+  border-bottom: 1px solid var(--line);
+}
+.timeline__n {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--clay);
+  letter-spacing: 0.02em;
+}
+.timeline__row h3 {
+  font-size: 1.25rem;
+}
+.timeline__row p {
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* ---------- statistics ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(8.5rem, 100%), 1fr));
+  gap: var(--s3) var(--s4);
+}
+.stat {
+  border-left: 1px solid var(--on-dark-line);
+  padding-left: var(--s2);
+}
+.stat__v {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(1.875rem, 1.3rem + 1.6vw, 2.5rem);
+  line-height: 1.05;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+}
+.stat__l {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--on-dark-muted);
+}
+
+/* ---------- image band ----------
+   A full-bleed photograph with type over it. Used for the two closing CTAs.
+   `isolation: isolate` keeps the z-index:-1 background inside this element
+   instead of letting it fall behind the page background. */
+.band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--on-dark);
+}
+.band__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--forest-deep);
+}
+.band__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Angled, so the type side is dark enough for AA contrast while the far side
+   keeps the photograph readable. */
+.band__bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(30, 49, 34, 0.9) 0%,
+    rgba(30, 49, 34, 0.72) 45%,
+    rgba(30, 49, 34, 0.34) 100%
+  );
+}
+.band__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: clamp(17rem, 32vh, 22rem);
+  padding-block: var(--s5);
+}
+.band__inner h2 {
+  color: var(--paper);
+  max-width: 26ch;
+}
+.band__inner h2 em {
+  color: var(--ochre);
+}
+.band__inner p {
+  color: var(--on-dark-muted);
+  font-size: var(--fs-lead);
+  max-width: var(--measure);
+}
+.band__inner .eyebrow {
+  color: var(--ochre);
+  margin-bottom: var(--s1);
+}
+.band__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+  margin-top: var(--s2);
+}
+
+/* ---------- breadcrumbs ---------- */
+.crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4375rem;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  padding-block: var(--s3) var(--s2);
+}
+.crumbs a {
+  transition: color var(--t) var(--ease);
+}
+.crumbs span:not(.crumbs__current) {
+  opacity: 0.45;
+}
+.crumbs__current {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ---------- hover states, mouse only ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    border-color: var(--line);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+  .card:hover .media svg {
+    transform: scale(1.05);
+  }
+  .card__name:hover {
+    color: var(--clay);
+  }
+  .size:hover:not(.is-active) {
+    border-color: var(--leaf);
+    color: var(--forest);
+  }
+  .add-btn:hover {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: var(--paper);
+  }
+  .media-card:hover .frame img {
+    transform: scale(1.04);
+  }
+  .crumbs a:hover {
+    color: var(--forest);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+/* ============================================================
+   Phones — swipe rails and stacked splits
+   ============================================================ */
+@media (max-width: 720px) {
+  /* A grid marked --rail becomes a horizontal snap track on phones: the
+     featured row stops being a 2400px vertical wall and becomes one gesture.
+     Full-bleed via negative gutters so a card is visibly cut off at the right
+     edge — that overhang is the affordance that says "this scrolls". */
+  .grid--rail {
+    display: flex;
+    gap: var(--s2);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: calc(var(--gutter) + var(--sal));
+    margin-left: calc(-1 * (var(--gutter) + var(--sal)));
+    margin-right: calc(-1 * (var(--gutter) + var(--sar)));
+    padding-left: calc(var(--gutter) + var(--sal));
+    padding-right: calc(var(--gutter) + var(--sar));
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+    /* Keeps a horizontal flick from chaining into the browser's back gesture. */
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .grid--rail::-webkit-scrollbar {
+    display: none;
+  }
+  .grid--rail > * {
+    flex: 0 0 min(66%, 15rem);
+    scroll-snap-align: start;
+  }
+
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s3);
+  }
+  /* Stacked, the picture belongs above the prose in every case, so the
+     desktop-only visual flip is undone. */
+  .split--reverse .split__media {
+    order: 0;
+  }
+  .split__media--offset::before {
+    display: none;
+  }
+
+  .timeline__row {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: 0 var(--s2);
+    padding-block: var(--s2);
+  }
+  .timeline__row p {
+    grid-column: 2;
+    margin-top: 0.375rem;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
