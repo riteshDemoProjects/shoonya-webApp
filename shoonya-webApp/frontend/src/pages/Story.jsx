@@ -47,9 +47,9 @@ const TEAM = [
     img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=600&fit=crop&crop=face'
   },
   {
-    name: 'Kavita Patel',
-    role: 'Community & Sustainability Lead',
-    desc: 'Works with local farming families to build resilient, chemical-free communities.',
+    name: 'Anjali Kumari',
+    role: 'Chief Technical Officer',
+    desc: 'Works at the digital side of the farm — integrating technology, ensuring customer engagement, and maintaining our online presence.',
     img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&h=600&fit=crop&crop=face'
   }
 ]
